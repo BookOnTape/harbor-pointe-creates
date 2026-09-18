@@ -1,0 +1,44 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "harbor-pointe-creates",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-06-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // The Worker runs on every request so it can gate /admin behind auth and
+    // answer /api/* before the static layer gets a look.
+    "run_worker_first": true,
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // ---------------------------------------------------------------------------
+  // Database. Create it once, then paste the id below:
+  //   npx wrangler d1 create harbor-pointe-creates
+  //   npm run db:migrate
+  // ---------------------------------------------------------------------------
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "harbor-pointe-creates",
+      "database_id": "REPLACE_WITH_D1_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Non-secret config. Secrets (RESEND_API_KEY, ADMIN_TOKEN, PRINTER_TOKEN,
+  // ACCESS_AUD) go in `npx wrangler secret put <NAME>` or the dashboard —
+  // never in this file, it's committed.
+  "vars": {
+    "SITE_NAME": "Harbor Pointe Creates",
+    "OWNER_NAME": "Jer",
+    "CONTACT_TO": "hello@harborpointedesigns.com",
+    "CONTACT_FROM": "Harbor Pointe Creates <creates@harborpointedesigns.com>",
+    // Your Cloudflare Access team domain, e.g. "harborpointe.cloudflareaccess.com".
+    // Leave empty to skip Access and rely on ADMIN_TOKEN only.
+    "ACCESS_TEAM_DOMAIN": "",
+    // Default spool price used for the filament cost "what-ifs" (USD per kg).
+    "SPOOL_PRICE_PER_KG": "22"
+  }
+}

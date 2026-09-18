@@ -1,0 +1,431 @@
+---
+import Base from '../../layouts/Base.astro';
+import Wordmark from '../../components/Wordmark.astro';
+import { BOARD_COLUMNS, STATUSES, MATERIALS } from '../../../shared/statuses.js';
+---
+
+<Base title="Admin — Harbor Pointe Creates" noindex>
+  <div class="app" id="app">
+    <header class="topbar">
+      <a class="topbar-brand" href="/" title="Public site"><Wordmark size="16px" /></a>
+      <span class="topbar-tag">Admin</span>
+      <nav class="tabs" role="tablist">
+        <button class="tab is-active" data-tab="board" role="tab">Board</button>
+        <button class="tab" data-tab="list" role="tab">List</button>
+        <button class="tab" data-tab="stats" role="tab">Stats</button>
+      </nav>
+      <input class="search" type="search" placeholder="Search name, email, title, id…" aria-label="Search requests" />
+      <div class="topbar-right">
+        <span class="printer-pill" data-printer-pill title="Which request the bridge attaches progress to">
+          <span class="dot"></span><span data-printer-label>Printer idle</span>
+        </span>
+        <span class="who" data-who></span>
+        <button class="icon-btn" data-refresh title="Refresh">↻</button>
+      </div>
+    </header>
+
+    <div class="banner" data-banner hidden></div>
+
+    <main class="main">
+      <!-- BOARD -->
+      <section class="board" data-panel="board">
+        {BOARD_COLUMNS.map((k) => (
+          <div class="col" data-col={k}>
+            <div class="col-head">
+              <span class={`col-dot tone-${STATUSES[k].tone}`}></span>
+              <span class="col-title">{STATUSES[k].short}</span>
+              <span class="col-count" data-count>0</span>
+            </div>
+            <div class="col-cards" data-cards></div>
+          </div>
+        ))}
+      </section>
+
+      <!-- LIST -->
+      <section class="list" data-panel="list" hidden>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th><th>What</th><th>Who</th><th>Status</th><th>Qty</th><th>Color</th><th>Filament</th><th>Time</th><th>Needed</th><th>Created</th>
+            </tr>
+          </thead>
+          <tbody data-rows></tbody>
+        </table>
+        <p class="empty" data-list-empty hidden>No requests match.</p>
+      </section>
+
+      <!-- STATS -->
+      <section class="stats" data-panel="stats" hidden>
+        <div class="tiles" data-tiles></div>
+        <div class="stats-grid">
+          <div class="card">
+            <h3 class="card-title">Filament by month</h3>
+            <div class="bars" data-bars-month></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">By material</h3>
+            <div class="bars" data-bars-material></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">Requests by month</h3>
+            <div class="bars" data-bars-requests></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">Who prints the most</h3>
+            <table class="table table-sm"><tbody data-people></tbody></table>
+          </div>
+          <div class="card card-wide">
+            <h3 class="card-title">Recent print logs</h3>
+            <table class="table table-sm"><tbody data-recent-logs></tbody></table>
+          </div>
+          <div class="card">
+            <h3 class="card-title">What-ifs</h3>
+            <label class="lbl">Spool price (USD / kg)
+              <input type="number" step="0.5" min="0" data-spool-price />
+            </label>
+            <label class="lbl">Pretend hourly rate (USD / printer hour)
+              <input type="number" step="1" min="0" value="2" data-hourly />
+            </label>
+            <p class="whatif" data-whatif></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- DRAWER -->
+    <div class="scrim" data-scrim hidden></div>
+    <aside class="drawer" data-drawer hidden aria-label="Request details">
+      <div class="drawer-head">
+        <div>
+          <div class="drawer-id"><span data-d="short_id"></span> <span class="drawer-created" data-d="created"></span></div>
+          <h2 class="drawer-title" data-d="title"></h2>
+          <div class="drawer-who"><a data-d="mailto" href="#"></a></div>
+        </div>
+        <button class="icon-btn" data-close title="Close">×</button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Status -->
+        <section class="block">
+          <div class="block-title">Move it along</div>
+          <div class="next-row" data-next></div>
+          <form class="status-form" data-status-form>
+            <div class="grid-2">
+              <label class="lbl">Status
+                <select name="status">
+                  {Object.keys(STATUSES).map((k) => <option value={k}>{STATUSES[k].label}</option>)}
+                </select>
+              </label>
+              <label class="lbl">Estimated ready
+                <input type="date" name="eta" />
+              </label>
+            </div>
+            <label class="lbl">Note to them (optional)
+              <textarea name="note" rows="2" placeholder="e.g. Printing in sea glass PLA at 0.16 mm, should be off the bed tonight."></textarea>
+            </label>
+            <div class="checks">
+              <label><input type="checkbox" name="notify" checked /> Email them</label>
+              <label><input type="checkbox" name="public" checked /> Show note on tracking page</label>
+            </div>
+            <div class="row-end">
+              <span class="hint" data-status-hint></span>
+              <button class="btn btn-signal btn-sm" type="submit">Update</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Live / printer -->
+        <section class="block">
+          <div class="block-title">Printer</div>
+          <div class="printer-row">
+            <label class="switch"><input type="checkbox" data-current-toggle /> <span>This is the job on the printer</span></label>
+            <label class="switch"><input type="checkbox" data-share-toggle /> <span>Share camera on their tracking page</span></label>
+          </div>
+          <div class="live-row" data-live-row hidden>
+            <div class="live-bar"><div class="live-fill" data-live-fill></div></div>
+            <div class="live-meta" data-live-meta></div>
+          </div>
+          <div class="snap" data-snap hidden>
+            <img alt="Latest printer snapshot" data-snap-img />
+            <span class="snap-stamp" data-snap-stamp></span>
+          </div>
+          <p class="hint" data-printer-hint></p>
+        </section>
+
+        <!-- Details -->
+        <section class="block">
+          <div class="block-title">Details</div>
+          <form class="details-form" data-details-form>
+            <div class="grid-2">
+              <label class="lbl">Name<input name="name" /></label>
+              <label class="lbl">Email<input name="email" type="email" /></label>
+            </div>
+            <label class="lbl">Title<input name="title" /></label>
+            <label class="lbl">File link<input name="file_url" type="url" /><a class="hint" data-file-link target="_blank" rel="noopener" hidden>open ↗</a></label>
+            <div class="grid-3">
+              <label class="lbl">Qty<input name="quantity" type="number" min="1" max="50" /></label>
+              <label class="lbl">Color<input name="color" /></label>
+              <label class="lbl">Material
+                <select name="material">{MATERIALS.map((m) => <option value={m}>{m}</option>)}</select>
+              </label>
+            </div>
+            <div class="grid-3">
+              <label class="lbl">Size / scale<input name="size_notes" /></label>
+              <label class="lbl">Needed by<input name="needed_by" type="date" /></label>
+              <label class="lbl">Priority
+                <select name="priority"><option value="1">High</option><option value="0">Normal</option><option value="-1">Low</option></select>
+              </label>
+            </div>
+            <label class="lbl">Printer<input name="printer" placeholder="e.g. P1S, MK4" /></label>
+            <label class="lbl">Their notes<textarea name="details" rows="3" readonly></textarea></label>
+            <label class="lbl">Private notes<textarea name="admin_notes" rows="3" placeholder="Slicer settings, where the file is, what went wrong…"></textarea></label>
+            <div class="row-end"><button class="btn btn-outline-ink btn-sm" type="submit">Save details</button></div>
+          </form>
+        </section>
+
+        <!-- Logs -->
+        <section class="block">
+          <div class="block-title">Filament &amp; time <span class="hint" data-log-total></span></div>
+          <table class="table table-sm"><tbody data-logs></tbody></table>
+          <form class="log-form" data-log-form>
+            <div class="grid-4">
+              <label class="lbl">Grams<input name="grams" type="number" step="0.1" min="0" required /></label>
+              <label class="lbl">Minutes<input name="minutes" type="number" min="0" required /></label>
+              <label class="lbl">Material
+                <select name="material">{MATERIALS.filter((m) => m !== 'Any').map((m) => <option value={m}>{m}</option>)}</select>
+              </label>
+              <label class="lbl">Color<input name="color" /></label>
+            </div>
+            <div class="grid-2">
+              <label class="lbl">Notes<input name="notes" placeholder="0.2 mm, 15% gyroid, 2 walls" /></label>
+              <label class="checks lbl-inline"><input type="checkbox" name="failed" /> Failed print</label>
+            </div>
+            <div class="row-end"><button class="btn btn-outline-ink btn-sm" type="submit">Add log</button></div>
+          </form>
+        </section>
+
+        <!-- Message -->
+        <section class="block">
+          <div class="block-title">Send a note</div>
+          <form class="msg-form" data-msg-form>
+            <label class="lbl">Subject<input name="subject" placeholder="Quick question about the size" /></label>
+            <label class="lbl">Message<textarea name="body" rows="3" required></textarea></label>
+            <div class="row-end"><button class="btn btn-outline-ink btn-sm" type="submit">Email them</button></div>
+          </form>
+        </section>
+
+        <!-- Timeline -->
+        <section class="block">
+          <div class="block-title">Timeline</div>
+          <ul class="events" data-events></ul>
+        </section>
+
+        <section class="block block-danger">
+          <button class="link-danger" data-delete>Delete this request</button>
+        </section>
+      </div>
+    </aside>
+
+    <!-- AUTH -->
+    <div class="auth" data-auth hidden>
+      <div class="auth-card">
+        <Wordmark tone="ink" size="20px" />
+        <p class="auth-lead">Paste the admin token to open the console. (Behind Cloudflare Access this never shows.)</p>
+        <form data-auth-form>
+          <input type="password" name="token" placeholder="ADMIN_TOKEN" autocomplete="off" />
+          <button class="btn btn-signal" type="submit">Open</button>
+        </form>
+        <p class="auth-error" data-auth-error hidden></p>
+      </div>
+    </div>
+
+    <div class="toast" data-toast hidden></div>
+  </div>
+
+  <script>
+    import '../../scripts/admin.ts';
+  </script>
+</Base>
+
+<style is:global>
+  /* Admin is an app, not a page: dense, functional, still on-brand. */
+  body { background: var(--paper-deep); }
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 18px;
+    padding: 12px 20px;
+    background: var(--ink); color: var(--paper);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .topbar-brand { text-decoration: none; }
+  .topbar-tag {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink); background: var(--seaglass); padding: 4px 8px; border-radius: 4px;
+  }
+  .tabs { display: flex; gap: 4px; margin-left: 12px; }
+  .tab {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--paper-60); background: transparent; border: 1px solid transparent; border-radius: 6px;
+    padding: 8px 12px; cursor: pointer;
+  }
+  .tab:hover { color: var(--paper); }
+  .tab.is-active { color: var(--paper); border-color: var(--paper-30); }
+  .search {
+    margin-left: auto; width: min(360px, 40vw);
+    font-family: var(--font-body); font-size: 13px; color: var(--paper);
+    background: var(--field-bg); border: 1px solid var(--field-border); border-radius: 6px; padding: 8px 12px; outline: none;
+  }
+  .search:focus { border-color: var(--seaglass); }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .printer-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper-60);
+    border: 1px solid var(--paper-16); border-radius: 99px; padding: 6px 10px;
+  }
+  .printer-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--paper-30); }
+  .printer-pill.is-live .dot { background: var(--signal); }
+  .printer-pill.is-live { color: var(--paper); }
+  .who { font-family: var(--font-mono); font-size: 10px; color: var(--paper-45); }
+  .icon-btn { background: transparent; border: 1px solid var(--paper-16); color: var(--paper-72); border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: 16px; }
+  .icon-btn:hover { color: var(--paper); border-color: var(--paper); }
+
+  .banner { padding: 10px 20px; background: var(--warn); color: var(--ink); font-size: 13px; }
+  .main { flex: 1; padding: 20px; }
+
+  /* Board */
+  .board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 12px; min-height: 70vh; }
+  .col { background: rgba(11, 26, 33, 0.04); border-radius: var(--radius-card); padding: 10px; display: flex; flex-direction: column; min-width: 0; }
+  .col-head { display: flex; align-items: center; gap: 8px; padding: 6px 6px 10px; }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--slate); }
+  .tone-active { background: var(--signal) !important; }
+  .tone-good { background: var(--seaglass-deep) !important; }
+  .tone-warn { background: var(--warn) !important; }
+  .tone-bad { background: var(--bad) !important; }
+  .col-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); }
+  .col-count { margin-left: auto; font-family: var(--font-mono); font-size: 10px; color: var(--slate); }
+  .col-cards { display: flex; flex-direction: column; gap: 8px; }
+  .card-req {
+    background: var(--paper); border-radius: 8px; padding: 12px 12px 10px; cursor: pointer;
+    box-shadow: var(--shadow-card); border: 1px solid transparent; text-align: left; font: inherit; color: inherit; width: 100%;
+  }
+  .card-req:hover { border-color: var(--seaglass-deep); }
+  .card-req.is-priority { border-left: 3px solid var(--signal); }
+  .card-req.is-low { opacity: 0.7; }
+  .card-id { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; color: var(--slate); display: flex; justify-content: space-between; }
+  .card-id .live { color: var(--signal); }
+  .card-t { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.015em; margin-top: 4px; line-height: 1.2; }
+  .card-m { margin-top: 6px; font-size: 12px; color: var(--slate); }
+  .card-f { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--slate); }
+  .card-f .due { color: var(--signal-deep); }
+  .card-bar { height: 3px; border-radius: 2px; background: var(--hairline-ink); margin-top: 8px; overflow: hidden; }
+  .card-bar div { height: 100%; background: var(--signal); }
+
+  /* Table */
+  .table { width: 100%; border-collapse: collapse; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-card); }
+  .table th { text-align: left; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--slate); padding: 12px 12px; border-bottom: 1px solid var(--hairline-ink); font-weight: 400; }
+  .table td { padding: 11px 12px; border-bottom: 1px solid var(--hairline-ink); font-size: 13.5px; vertical-align: top; }
+  .table tr.row-req { cursor: pointer; }
+  .table tr.row-req:hover td { background: rgba(127, 205, 184, 0.12); }
+  .table-sm td { padding: 8px 8px; font-size: 13px; }
+  .table .mono { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--slate); }
+  .pill { display: inline-block; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; background: rgba(11,26,33,0.08); }
+  .pill.tone-active { background: var(--signal); }
+  .pill.tone-good { background: var(--seaglass); }
+  .pill.tone-warn { background: var(--warn); }
+  .pill.tone-bad { background: var(--bad); color: var(--paper); }
+  .empty { padding: 30px; text-align: center; color: var(--slate); font-family: var(--font-mono); font-size: 12px; }
+
+  /* Stats */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .tile-stat { background: var(--ink); color: var(--paper); border-radius: var(--radius-card); padding: 18px 18px 16px; }
+  .tile-k { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-60); }
+  .tile-v { font-family: var(--font-display); font-size: 36px; letter-spacing: -0.03em; margin-top: 8px; line-height: 1; }
+  .tile-v small { font-size: 14px; color: var(--paper-60); margin-left: 6px; font-family: var(--font-mono); letter-spacing: 0; }
+  .stats-grid { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .card { background: var(--paper); border-radius: var(--radius-card); padding: 18px; box-shadow: var(--shadow-card); }
+  .card-wide { grid-column: 1 / -1; }
+  .card-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--slate); font-weight: 400; margin-bottom: 14px; }
+  .bars { display: grid; gap: 8px; }
+  .bar-row { display: grid; grid-template-columns: 72px 1fr 90px; gap: 10px; align-items: center; font-size: 12px; }
+  .bar-row .k { font-family: var(--font-mono); font-size: 10.5px; color: var(--slate); }
+  .bar-row .v { font-family: var(--font-mono); font-size: 10.5px; text-align: right; color: var(--slate); }
+  .bar { height: 10px; border-radius: 5px; background: var(--hairline-ink); overflow: hidden; }
+  .bar div { height: 100%; background: linear-gradient(90deg, var(--seaglass-deep), var(--signal)); }
+  .whatif { margin-top: 10px; font-size: 14px; line-height: 1.6; color: var(--ink); }
+
+  /* Drawer */
+  .scrim { position: fixed; inset: 0; background: rgba(6, 18, 26, 0.45); z-index: 30; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100vw); z-index: 40;
+    background: var(--paper); box-shadow: -20px 0 60px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column;
+  }
+  .drawer-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 22px 24px 16px; border-bottom: 1px solid var(--hairline-ink); background: var(--ink); color: var(--paper); }
+  .drawer-id { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--seaglass); }
+  .drawer-created { color: var(--paper-45); margin-left: 8px; }
+  .drawer-title { font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: -0.02em; margin-top: 6px; line-height: 1.1; }
+  .drawer-who { margin-top: 6px; font-size: 13px; }
+  .drawer-who a { color: var(--paper-72); text-decoration: none; }
+  .drawer-body { overflow-y: auto; padding: 8px 24px 40px; }
+  .block { padding: 18px 0; border-bottom: 1px solid var(--hairline-ink); }
+  .block-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--slate); margin-bottom: 12px; display: flex; justify-content: space-between; }
+  .next-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .next-btn { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 7px 11px; border-radius: 99px; border: 1px solid rgba(11,26,33,0.2); background: transparent; cursor: pointer; }
+  .next-btn:hover { border-color: var(--ink); }
+  .next-btn.is-next { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .lbl { display: flex; flex-direction: column; gap: 5px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--slate); margin-bottom: 10px; }
+  .lbl-inline { flex-direction: row; align-items: center; gap: 8px; margin-top: 18px; }
+  .lbl input, .lbl select, .lbl textarea, .msg-form input, .msg-form textarea {
+    font-family: var(--font-body); font-size: 14px; color: var(--ink); letter-spacing: 0; text-transform: none;
+    background: #fff; border: 1px solid rgba(11,26,33,0.16); border-radius: 6px; padding: 9px 11px; outline: none; width: 100%;
+  }
+  .lbl input:focus, .lbl select:focus, .lbl textarea:focus { border-color: var(--seaglass-deep); }
+  .lbl textarea[readonly] { background: rgba(11,26,33,0.04); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .checks { display: flex; gap: 18px; font-size: 13px; color: var(--ink); flex-wrap: wrap; }
+  .checks label { display: inline-flex; align-items: center; gap: 6px; }
+  .row-end { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 10px; }
+  .btn-sm { padding: 10px 18px; font-size: 13px; }
+  .hint { font-family: var(--font-mono); font-size: 10.5px; color: var(--slate); letter-spacing: 0.04em; text-transform: none; }
+  .printer-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .switch { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; }
+  .live-row { margin: 10px 0; }
+  .live-bar { height: 8px; background: var(--hairline-ink); border-radius: 4px; overflow: hidden; }
+  .live-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--seaglass-deep), var(--signal)); }
+  .live-meta { margin-top: 6px; font-family: var(--font-mono); font-size: 10.5px; color: var(--slate); display: flex; justify-content: space-between; }
+  .snap { position: relative; margin-top: 10px; border-radius: 8px; overflow: hidden; background: #000; }
+  .snap img { width: 100%; display: block; }
+  .snap-stamp { position: absolute; left: 10px; bottom: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--paper); background: rgba(0,0,0,0.5); padding: 3px 7px; border-radius: 4px; }
+  .events { list-style: none; display: grid; gap: 8px; }
+  .ev { display: grid; grid-template-columns: 110px 1fr; gap: 12px; font-size: 13px; padding: 8px 10px; background: rgba(11,26,33,0.04); border-radius: 6px; }
+  .ev-when { font-family: var(--font-mono); font-size: 10px; color: var(--slate); letter-spacing: 0.06em; padding-top: 2px; }
+  .ev-s { font-weight: 600; }
+  .ev-flags { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--slate); margin-left: 6px; }
+  .ev.is-private { border-left: 2px solid var(--warn); }
+  .log-del { background: none; border: none; color: var(--bad); cursor: pointer; font-size: 14px; }
+  .block-danger { border-bottom: none; }
+  .link-danger { background: none; border: none; color: var(--bad); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+
+  /* Auth */
+  .auth { position: fixed; inset: 0; z-index: 50; background: var(--ink); display: grid; place-items: center; padding: 20px; }
+  .auth-card { background: var(--paper); border-radius: var(--radius-card); padding: 32px; width: min(440px, 100%); }
+  .auth-lead { margin: 14px 0 20px; color: var(--slate); font-size: 14px; line-height: 1.6; }
+  .auth form { display: flex; gap: 10px; }
+  .auth input { flex: 1; font-family: var(--font-mono); font-size: 13px; padding: 12px 14px; border: 1px solid rgba(11,26,33,0.2); border-radius: 6px; outline: none; }
+  .auth-error { margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--bad); }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--paper); font-family: var(--font-mono); font-size: 12px; padding: 12px 18px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  .toast.is-bad { background: var(--bad); }
+
+  @media (max-width: 800px) {
+    .topbar { flex-wrap: wrap; gap: 10px; }
+    .search { margin-left: 0; width: 100%; order: 10; }
+    .who { display: none; }
+    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .ev { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>

@@ -1,0 +1,46 @@
+# Copy to config.yaml (git-ignored). Runs on any machine on the same LAN as the
+# printer: your Mac, a Raspberry Pi, the OctoPrint Pi itself.
+
+site:
+  url: https://creates.harborpointedesigns.com   # or http://127.0.0.1:8787 for local dev
+  printer_token: change-me                        # must match the Worker's PRINTER_TOKEN secret
+
+# How often to post progress, and how often to include a camera frame.
+poll_seconds: 30
+snapshot_every_seconds: 180
+snapshot_max_width: 960          # frames are downscaled + re-encoded as JPEG before upload
+snapshot_jpeg_quality: 72
+
+# Pick ONE printer block and delete the others. Start with `demo` to see the
+# tracking page light up before the real printer is wired in.
+
+printer:
+  kind: moonraker                # Klipper / Mainsail / Fluidd / Creality K1 etc.
+  host: http://192.168.1.50      # Moonraker base URL (port 7125 if not proxied)
+  api_key: ""                    # only if you enabled Moonraker auth
+  snapshot_url: ""               # blank = ask Moonraker for its configured webcam
+
+# printer:
+#   kind: octoprint
+#   host: http://octopi.local
+#   api_key: YOUR_OCTOPRINT_API_KEY
+#   snapshot_url: ""             # blank = http://<host>/webcam/?action=snapshot
+
+# printer:
+#   kind: bambu                  # LAN mode: Settings > General > LAN Only Mode (or leave cloud on; LAN MQTT still works)
+#   host: 192.168.1.60
+#   serial: 01P00A000000000      # printer serial (Settings > Device)
+#   access_code: "12345678"      # LAN access code from the printer screen
+#   camera: auto                 # auto | p1 | x1 | none  (p1 = P1/A1 TCP-6000 stream, x1 = X1/H2 RTSP via ffmpeg)
+
+# printer:
+#   kind: prusalink              # MK4 / XL / Mini with PrusaLink
+#   host: http://192.168.1.70
+#   username: maker
+#   password: YOUR_PRUSALINK_PASSWORD
+#   snapshot_url: ""             # PrusaLink has no camera API; point this at any MJPEG/JPEG URL if you have one
+
+# Any printer: override the camera with a plain JPEG URL (e.g. from a Wyze / go2rtc / mjpg-streamer),
+# or a shell command that writes a JPEG to the path given as {out}.
+# snapshot_url: http://192.168.1.90/snapshot.jpg
+# snapshot_cmd: ffmpeg -y -loglevel error -rtsp_transport tcp -i rtsp://user:pass@cam/stream -frames:v 1 {out}

@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base title="Not found — Harbor Pointe Creates" noindex>
+  <section class="nf">
+    <Nav />
+    <div class="container nf-body">
+      <p class="eyebrow eyebrow-glass">404</p>
+      <h1 class="display nf-title">That layer <em>didn’t</em> stick.</h1>
+      <p class="nf-lead">The page you wanted is not here. Try the front page or your tracking link.</p>
+      <a href="/" class="btn btn-signal">Back to the front</a>
+    </div>
+  </section>
+  <Footer />
+</Base>
+
+<style>
+  .nf { background: var(--ink); color: var(--paper); min-height: 70vh; }
+  .nf-body { padding-block: 80px 120px; }
+  .nf-title { margin-top: 18px; font-size: clamp(36px, 7vw, 72px); }
+  .nf-lead { margin: 20px 0 32px; color: var(--paper-72); max-width: 460px; line-height: 1.6; }
+</style>

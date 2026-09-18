@@ -1,0 +1,198 @@
+/* ============================================================
+   Harbor Pointe Creates — design tokens + base
+   Sibling of the Designs site: same type family (Fraunces /
+   JetBrains Mono / Archivo), new palette and rhythm.
+   ============================================================ */
+
+:root {
+  /* --- Color --- */
+  --ink: #0b1a21;            /* Deep Tide — dark grounds (cooler than Designs' Harbor Ink) */
+  --ink-deep: #06121a;       /* footer, strips */
+  --ink-soft: #12242c;       /* raised panels on dark */
+  --paper: #eef0ea;          /* Fog — light ground (cooler than Warm Paper) */
+  --paper-deep: #e3e6dd;     /* alternate light band */
+  --seaglass: #7fcdb8;       /* primary accent: links, labels, the dot */
+  --seaglass-deep: #3f9d87;  /* seaglass on light grounds (contrast-safe) */
+  --signal: #ff7a45;         /* hot-end orange: CTAs, progress */
+  --signal-deep: #d9582a;
+  --slate: #5b6e73;          /* secondary text on light */
+  --ok: #7fcdb8;
+  --warn: #e8b84a;
+  --bad: #e06c5c;
+
+  --paper-80: rgba(238, 240, 234, 0.8);
+  --paper-72: rgba(238, 240, 234, 0.72);
+  --paper-60: rgba(238, 240, 234, 0.6);
+  --paper-45: rgba(238, 240, 234, 0.45);
+  --paper-30: rgba(238, 240, 234, 0.3);
+  --paper-16: rgba(238, 240, 234, 0.16);
+  --hairline: rgba(238, 240, 234, 0.08);
+  --hairline-ink: rgba(11, 26, 33, 0.1);
+  --field-bg: rgba(238, 240, 234, 0.06);
+  --field-border: rgba(238, 240, 234, 0.16);
+
+  /* --- Type --- */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-body: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* --- Layout --- */
+  --maxw: 1180px;
+  --pad-x: 32px;
+
+  /* --- Radius --- */
+  --radius-pill: 99px;
+  --radius-card: 10px;
+  --radius-field: 8px;
+
+  --shadow-card: 0 1px 2px rgba(11, 26, 33, 0.08), 0 12px 32px -18px rgba(11, 26, 33, 0.35);
+  --ease: 170ms ease;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Class display rules must never beat the hidden attribute. */
+[hidden] {
+  display: none !important;
+}
+
+[id] {
+  scroll-margin-top: 24px;
+}
+
+.container {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--pad-x);
+}
+
+/* ---------- Shared type primitives ---------- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.eyebrow-glass { color: var(--seaglass); }
+.eyebrow-ink { color: var(--seaglass-deep); }
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+.display em {
+  font-style: italic;
+}
+
+.lead {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 15px 26px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  transition: filter var(--ease), background var(--ease), border-color var(--ease), transform var(--ease);
+}
+.btn:active { transform: translateY(1px); }
+.btn-signal {
+  background: var(--signal);
+  color: var(--ink);
+}
+.btn-signal:hover { filter: brightness(1.06); }
+.btn-paper {
+  background: var(--paper);
+  color: var(--ink);
+}
+.btn-paper:hover { filter: brightness(0.95); }
+.btn-outline {
+  background: transparent;
+  color: var(--paper);
+  border: 1px solid var(--paper-30);
+}
+.btn-outline:hover { border-color: var(--paper); }
+.btn-outline-ink {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid rgba(11, 26, 33, 0.25);
+}
+.btn-outline-ink:hover { border-color: var(--ink); }
+.btn:disabled { opacity: 0.6; cursor: default; }
+
+a {
+  transition: opacity var(--ease), color var(--ease);
+}
+
+/* ---------- Chips / tags ---------- */
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border-radius: 4px;
+  border: 1px solid var(--hairline-ink);
+  color: var(--slate);
+}
+
+/* ---------- Layer motif (the "print" stripes) ---------- */
+.layers {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(127, 205, 184, 0.14) 0 1px,
+    transparent 1px 7px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}

@@ -1,0 +1,80 @@
+---
+const steps = [
+  {
+    n: '01',
+    title: 'Find a file',
+    body: 'Browse the sites below or design your own. Send me a link to the model page, or reply to the confirmation email with the STL / 3MF attached.',
+  },
+  {
+    n: '02',
+    title: 'Tell me the details',
+    body: 'Color, size, how many, and when you need it. If you are not sure, say so and I will suggest something that prints well.',
+  },
+  {
+    n: '03',
+    title: 'Track it like a package',
+    body: 'You get a link. It moves from Received to Queued to Printing to Ready, with live progress and a camera shot while it is on the bed.',
+  },
+];
+---
+
+<section id="how" class="how">
+  <div class="container how-inner">
+    <div class="how-head">
+      <p class="eyebrow eyebrow-ink">01 — How it works</p>
+      <h2 class="display how-title">Three steps, <em>zero</em> invoices.</h2>
+    </div>
+    <ol class="how-steps">
+      {steps.map((s) => (
+        <li class="how-step">
+          <span class="how-n">{s.n}</span>
+          <h3 class="how-step-title">{s.title}</h3>
+          <p class="how-step-body">{s.body}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .how { background: var(--paper); padding-block: 104px; }
+  .how-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 64px;
+    align-items: start;
+  }
+  .how-title { margin-top: 18px; font-size: clamp(34px, 5vw, 52px); }
+  .how-steps {
+    list-style: none;
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--hairline-ink);
+  }
+  .how-step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 6px 20px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--hairline-ink);
+  }
+  .how-n {
+    grid-row: span 2;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--seaglass-deep);
+    padding-top: 6px;
+  }
+  .how-step-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.02em;
+  }
+  .how-step-body { color: var(--slate); line-height: 1.6; max-width: 520px; }
+  @media (max-width: 860px) {
+    .how { padding-block: 80px; }
+    .how-inner { grid-template-columns: 1fr; gap: 36px; }
+  }
+</style>

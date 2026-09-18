@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `npm run cf:preview`. Never commit .dev.vars.
+ADMIN_TOKEN=change-me-local-admin
+PRINTER_TOKEN=change-me-local-printer
+# RESEND_API_KEY=re_xxx   # leave unset locally: emails are logged, not sent

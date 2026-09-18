@@ -1,0 +1,83 @@
+---
+const faqs = [
+  {
+    q: 'What does it cost?',
+    a: 'Nothing. This is a friends-and-family thing. If you want to cover a spool of a special filament for a big print, I will not stop you, but I will not ask.',
+  },
+  {
+    q: 'How big can it be?',
+    a: 'Roughly a 250 mm cube in one piece. Bigger things print in sections and get glued, which works fine for most decor.',
+  },
+  {
+    q: 'What file types?',
+    a: 'STL, 3MF, OBJ, or STEP. A link to the model page on any of the sites above is easiest. If you only have a picture of something, send that and we will figure it out.',
+  },
+  {
+    q: 'How long does it take?',
+    a: 'Small things print in an hour or two; a detailed figure can take a full day on the printer. Queue time depends on what is ahead of you. The tracking page shows where you are.',
+  },
+  {
+    q: 'Can you print this thing from a movie or game?',
+    a: 'For your own shelf, usually yes. I will not print weapons, anything unsafe, or things meant for resale.',
+  },
+  {
+    q: 'Colors?',
+    a: 'I keep a rotating rack of PLA in a dozen or so colors plus a few PETG and TPU options. Ask for a color and I will tell you what is close.',
+  },
+];
+---
+
+<section id="faq" class="faq">
+  <div class="container faq-inner">
+    <div class="faq-head">
+      <p class="eyebrow eyebrow-ink">04 — Questions</p>
+      <h2 class="display faq-title">Things people <em>ask.</em></h2>
+    </div>
+    <div class="faq-list">
+      {faqs.map((f) => (
+        <details class="faq-item">
+          <summary class="faq-q">{f.q}<span class="faq-plus" aria-hidden="true">+</span></summary>
+          <p class="faq-a">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq { background: var(--paper); padding-block: 104px; }
+  .faq-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 64px;
+    align-items: start;
+  }
+  .faq-title { margin-top: 18px; font-size: clamp(34px, 5vw, 52px); }
+  .faq-list { border-top: 1px solid var(--hairline-ink); }
+  .faq-item { border-bottom: 1px solid var(--hairline-ink); }
+  .faq-q {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 21px;
+    letter-spacing: -0.02em;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-plus {
+    font-family: var(--font-mono);
+    color: var(--seaglass-deep);
+    transition: transform var(--ease);
+  }
+  .faq-item[open] .faq-plus { transform: rotate(45deg); }
+  .faq-a { padding-bottom: 22px; color: var(--slate); line-height: 1.6; max-width: 560px; }
+  @media (max-width: 860px) {
+    .faq { padding-block: 80px; }
+    .faq-inner { grid-template-columns: 1fr; gap: 36px; }
+  }
+</style>

@@ -1,0 +1,193 @@
+---
+import Nav from './Nav.astro';
+import Wordmark from './Wordmark.astro';
+---
+
+<section id="hero" class="hero">
+  <div class="hero-grid layers" aria-hidden="true"></div>
+  <div class="hero-glow" aria-hidden="true"></div>
+
+  <Nav />
+
+  <div class="hero-body container">
+    <div class="hero-copy">
+      <p class="eyebrow eyebrow-glass">The printing side of Harbor Pointe · friends &amp; family</p>
+      <Wordmark as="h1" class="hero-wordmark" size="clamp(44px, 9vw, 92px)" stacked />
+      <p class="hero-subline lead">
+        Found something you want made real? Send me the file, pick a color, and I’ll
+        print it. No charge, no rush, and you can watch it happen.
+      </p>
+      <div class="hero-ctas">
+        <a href="#request" class="btn btn-signal">Request a print</a>
+        <a href="#sources" class="btn btn-outline">Where to find files</a>
+      </div>
+    </div>
+
+    <!-- Decorative "ticket": what a live request looks like. -->
+    <aside class="ticket" aria-label="Example of a request in progress">
+      <div class="ticket-head">
+        <span class="ticket-id">HPC-0017</span>
+        <span class="ticket-state"><span class="ticket-pulse"></span>On the printer</span>
+      </div>
+      <div class="ticket-title">Articulated axolotl <em>· 2× · sea glass PLA</em></div>
+      <div class="ticket-bar"><div class="ticket-fill" style="width: 64%"></div></div>
+      <div class="ticket-meta">
+        <span>64%</span>
+        <span>layer 212 / 331</span>
+        <span>~1h 40m left</span>
+      </div>
+      <ol class="ticket-steps">
+        <li class="done">Received</li>
+        <li class="done">Reviewed</li>
+        <li class="done">Queued</li>
+        <li class="now">Printing</li>
+        <li>Finishing</li>
+        <li>Ready</li>
+      </ol>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.55;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 40%, #000 70%, transparent 100%);
+    pointer-events: none;
+  }
+  .hero-glow {
+    position: absolute;
+    right: -10%;
+    top: 10%;
+    width: 640px;
+    height: 640px;
+    max-width: 120vw;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 122, 69, 0.22) 0%,
+      rgba(127, 205, 184, 0.08) 40%,
+      rgba(127, 205, 184, 0) 70%
+    );
+    pointer-events: none;
+  }
+  .hero-body {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+    gap: 56px;
+    align-items: center;
+    padding-top: 72px;
+    padding-bottom: 112px;
+  }
+  .hero-wordmark { margin-top: 26px; }
+  .hero-subline {
+    max-width: 520px;
+    margin-top: 28px;
+    font-size: 18px;
+    color: var(--paper-72);
+  }
+  .hero-ctas {
+    margin-top: 36px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* ---- ticket ---- */
+  .ticket {
+    background: var(--ink-soft);
+    border: 1px solid var(--paper-16);
+    border-radius: var(--radius-card);
+    padding: 22px 24px 20px;
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
+    transform: rotate(-1.2deg);
+  }
+  .ticket-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .ticket-id { color: var(--paper-60); }
+  .ticket-state { color: var(--signal); display: inline-flex; align-items: center; gap: 8px; }
+  .ticket-pulse {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 0 rgba(255, 122, 69, 0.6);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 122, 69, 0.55); }
+    70% { box-shadow: 0 0 0 9px rgba(255, 122, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 122, 69, 0); }
+  }
+  .ticket-title {
+    margin-top: 16px;
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+  .ticket-title em { color: var(--paper-60); font-size: 0.75em; }
+  .ticket-bar {
+    margin-top: 16px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--paper-16);
+    overflow: hidden;
+  }
+  .ticket-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--seaglass), var(--signal));
+    border-radius: 3px;
+  }
+  .ticket-meta {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--paper-60);
+  }
+  .ticket-steps {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--hairline);
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--paper-45);
+  }
+  .ticket-steps li::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--paper-30);
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .ticket-steps li.done { color: var(--paper-72); }
+  .ticket-steps li.done::before { background: var(--seaglass); }
+  .ticket-steps li.now { color: var(--signal); }
+  .ticket-steps li.now::before { background: var(--signal); }
+
+  @media (max-width: 900px) {
+    .hero-body { grid-template-columns: 1fr; gap: 40px; padding-top: 48px; padding-bottom: 80px; }
+    .ticket { transform: none; max-width: 480px; }
+  }
+</style>

@@ -1,0 +1,234 @@
+---
+import { SOURCES, CATEGORIES, COST_LABEL } from '../data/sources.js';
+const core = SOURCES.filter((s) => s.tier === 'core');
+const more = SOURCES.filter((s) => s.tier !== 'core');
+const cats = Object.entries(CATEGORIES);
+---
+
+<section id="sources" class="sources">
+  <div class="container">
+    <div class="sources-head">
+      <div>
+        <p class="eyebrow eyebrow-ink">03 — Find a file</p>
+        <h2 class="display sources-title">Where the <em>good</em> files live.</h2>
+        <p class="sources-lead">
+          There is no single best site. The big libraries overlap a lot, and the
+          interesting stuff hides on the niche ones. Send me a link to the model page
+          and I will take it from there.
+        </p>
+      </div>
+      <div class="sources-filter" role="group" aria-label="Filter sources by category">
+        <button class="chip is-active" data-cat="all" type="button">All</button>
+        {cats.map(([k, label]) => (
+          <button class="chip" data-cat={k} type="button">{label}</button>
+        ))}
+      </div>
+    </div>
+
+    <h3 class="sources-sub">The big six</h3>
+    <div class="grid grid-core">
+      {core.map((s) => (
+        <a class="tile" href={s.url} target="_blank" rel="noopener" data-cats={s.cats.join(' ')} style={`--hue:${s.hue}`}>
+          <div class="mark" aria-hidden="true">
+            <span class="mark-mono">{s.mono}</span>
+            <span class="mark-ring"></span>
+          </div>
+          <div class="tile-body">
+            <div class="tile-top">
+              <span class="tile-name">{s.name}</span>
+              <span class:list={['cost', `cost-${s.cost}`]}>{COST_LABEL[s.cost]}</span>
+            </div>
+            <p class="tile-blurb">{s.blurb}</p>
+            <div class="tile-tags">
+              {s.cats.map((c) => <span class="tag">{CATEGORIES[c]}</span>)}
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <h3 class="sources-sub">Beyond the big six</h3>
+    <div class="grid grid-more">
+      {more.map((s) => (
+        <a class="tile tile-sm" href={s.url} target="_blank" rel="noopener" data-cats={s.cats.join(' ')} style={`--hue:${s.hue}`}>
+          <div class="mark mark-sm" aria-hidden="true">
+            <span class="mark-mono">{s.mono}</span>
+            <span class="mark-ring"></span>
+          </div>
+          <div class="tile-body">
+            <div class="tile-top">
+              <span class="tile-name">{s.name}</span>
+              <span class:list={['cost', `cost-${s.cost}`]}>{COST_LABEL[s.cost]}</span>
+            </div>
+            <p class="tile-blurb">{s.blurb}</p>
+            <div class="tile-tags">
+              {s.cats.map((c) => <span class="tag">{CATEGORIES[c]}</span>)}
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+    <p class="sources-empty" hidden>Nothing in this category yet.</p>
+  </div>
+</section>
+
+<style>
+  .sources { background: var(--paper-deep); padding-block: 104px; }
+  .sources-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: end;
+  }
+  .sources-title { margin-top: 18px; font-size: clamp(34px, 5vw, 52px); }
+  .sources-lead { margin-top: 18px; color: var(--slate); line-height: 1.6; max-width: 520px; }
+  .sources-filter { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 9px 13px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(11, 26, 33, 0.18);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background var(--ease), color var(--ease), border-color var(--ease);
+  }
+  .chip:hover { border-color: var(--ink); }
+  .chip.is-active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  .sources-sub {
+    margin-top: 56px;
+    margin-bottom: 18px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--slate);
+    font-weight: 400;
+  }
+  .grid { display: grid; gap: 16px; }
+  .grid-core { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-more { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: var(--paper);
+    border-radius: var(--radius-card);
+    padding: 22px;
+    text-decoration: none;
+    color: var(--ink);
+    box-shadow: var(--shadow-card);
+    border: 1px solid transparent;
+    transition: transform var(--ease), border-color var(--ease), box-shadow var(--ease);
+  }
+  .tile:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--hue) 55%, transparent);
+  }
+  .tile.is-hidden { display: none; }
+
+  .mark {
+    position: relative;
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--hue) 90%, #000) 0%, var(--hue) 55%, color-mix(in srgb, var(--hue) 65%, #fff) 100%);
+    color: #fff;
+    overflow: hidden;
+    flex: none;
+  }
+  .mark-sm { width: 48px; height: 48px; border-radius: 12px; }
+  .mark-mono {
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.04em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  }
+  .mark-sm .mark-mono { font-size: 20px; }
+  .mark-ring {
+    position: absolute;
+    right: -18px; bottom: -18px;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 6px solid rgba(255,255,255,0.28);
+  }
+  .tile-body { display: flex; flex-direction: column; gap: 10px; }
+  .tile-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .tile-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+  .tile-sm .tile-name { font-size: 19px; }
+  .cost {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .cost-free { color: var(--seaglass-deep); }
+  .cost-mixed { color: var(--slate); }
+  .cost-paid { color: var(--signal-deep); }
+  .tile-blurb { font-size: 14.5px; line-height: 1.55; color: var(--slate); }
+  .tile-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+  .sources-empty {
+    margin-top: 24px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--slate);
+  }
+
+  @media (max-width: 1000px) {
+    .grid-core { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-more { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 860px) {
+    .sources { padding-block: 80px; }
+    .sources-head { grid-template-columns: 1fr; }
+    .sources-filter { justify-content: flex-start; }
+  }
+  @media (max-width: 560px) {
+    .grid-core, .grid-more { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const root = document.getElementById('sources');
+  if (root) {
+    const chips = root.querySelectorAll<HTMLButtonElement>('.chip');
+    const tiles = root.querySelectorAll<HTMLElement>('.tile');
+    const subs = root.querySelectorAll<HTMLElement>('.sources-sub');
+    const grids = root.querySelectorAll<HTMLElement>('.grid');
+    const empty = root.querySelector<HTMLElement>('.sources-empty');
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const cat = chip.dataset.cat || 'all';
+        chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+        let shown = 0;
+        tiles.forEach((t) => {
+          const ok = cat === 'all' || (t.dataset.cats || '').split(' ').includes(cat);
+          t.classList.toggle('is-hidden', !ok);
+          if (ok) shown++;
+        });
+        // Hide a section heading when its grid is empty.
+        grids.forEach((g, i) => {
+          const any = Array.from(g.querySelectorAll('.tile')).some((t) => !t.classList.contains('is-hidden'));
+          g.hidden = !any;
+          if (subs[i]) subs[i].hidden = !any;
+        });
+        if (empty) empty.hidden = shown > 0;
+      });
+    });
+  }
+</script>

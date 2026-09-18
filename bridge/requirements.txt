@@ -1,0 +1,6 @@
+requests>=2.31
+pyyaml>=6.0
+# Bambu Lab only:
+paho-mqtt>=2.0
+# Optional: downscale snapshots before upload (recommended)
+pillow>=10.0

@@ -1,0 +1,65 @@
+---
+/**
+ * "Harbor Pointe Creates" lockup. Typed (not artwork) so it stays a sibling of
+ * the Designs wordmark without reusing its outlined SVG. The dot is sea glass
+ * here where Designs uses clay.
+ *
+ *   tone: 'paper' (on dark) | 'ink' (on light)
+ *   size: font-size for the display line
+ */
+interface Props {
+  tone?: 'paper' | 'ink';
+  size?: string;
+  as?: keyof HTMLElementTagNameMap;
+  class?: string;
+  stacked?: boolean;
+}
+const {
+  tone = 'paper',
+  size = '22px',
+  as = 'span',
+  class: className = '',
+  stacked = false,
+} = Astro.props;
+const Tag = as;
+---
+
+<Tag class:list={['wm', `wm-${tone}`, stacked && 'wm-stacked', className]} style={`font-size:${size};`}>
+  <span class="wm-line">Harbor Pointe</span>
+  <span class="wm-line wm-em">Creates<span class="wm-dot" aria-hidden="true"></span></span>
+</Tag>
+
+<style>
+  .wm {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.28em;
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .wm-stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.02em;
+  }
+  .wm-paper { color: var(--paper); }
+  .wm-ink { color: var(--ink); }
+  .wm-em {
+    font-style: italic;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: baseline;
+  }
+  .wm-dot {
+    display: inline-block;
+    width: 0.24em;
+    height: 0.24em;
+    border-radius: 50%;
+    background: var(--seaglass);
+    margin-left: 0.14em;
+    transform: translateY(-0.02em);
+  }
+</style>

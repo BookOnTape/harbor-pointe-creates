@@ -1,0 +1,29 @@
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules/
+
+# astro
+.astro/
+
+# cloudflare / wrangler
+.wrangler/
+.dev.vars
+
+# bridge (local printer config + venv)
+bridge/config.yaml
+bridge/.venv/
+__pycache__/
+
+# environment
+.env
+.env.production
+
+# macOS
+.DS_Store
+
+# editor
+.vscode/
+.idea/

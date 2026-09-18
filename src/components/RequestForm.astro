@@ -1,0 +1,265 @@
+---
+import { MATERIALS } from '../../shared/statuses.js';
+const colors = ['No preference', 'Black', 'White', 'Grey', 'Sea glass', 'Orange', 'Red', 'Blue', 'Green', 'Purple', 'Pink', 'Yellow', 'Wood-fill', 'Glow', 'Other (say in notes)'];
+---
+
+<section id="request" class="request">
+  <div class="container request-inner">
+    <div class="request-copy">
+      <p class="eyebrow eyebrow-glass">02 — Request a print</p>
+      <h2 class="display request-title">Send it <em>over.</em></h2>
+      <p class="request-lead">
+        A link to the model page is perfect. If you have the file itself, reply to
+        the confirmation email with it attached.
+      </p>
+
+      <ul class="request-notes">
+        <li><strong>Good bets:</strong> organizers, stands, toys, figures, replacement knobs, cookie cutters, anything under a shoebox.</li>
+        <li><strong>Ask first:</strong> very large pieces, food-contact items, and anything that needs to hold real weight.</li>
+        <li><strong>Hard no:</strong> weapons, anything unsafe, anything for resale.</li>
+      </ul>
+    </div>
+
+    <form id="request-form" class="form" novalidate>
+      <div class="visually-hidden" aria-hidden="true">
+        <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input id="f-name" type="text" name="name" autocomplete="name" required />
+          <p class="field-error" data-error-for="name" hidden></p>
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" type="email" name="email" autocomplete="email" required />
+          <p class="field-error" data-error-for="email" hidden></p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-title">What is it?</label>
+        <input id="f-title" type="text" name="title" placeholder="e.g. Articulated axolotl, headphone stand" required />
+        <p class="field-error" data-error-for="title" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="f-file">Link to the file or model page <span class="opt">optional</span></label>
+        <input id="f-file" type="url" name="file_url" placeholder="https://www.printables.com/model/…" inputmode="url" />
+        <p class="field-error" data-error-for="file_url" hidden></p>
+      </div>
+
+      <div class="row row-3">
+        <div class="field">
+          <label for="f-qty">How many</label>
+          <input id="f-qty" type="number" name="quantity" min="1" max="50" value="1" />
+        </div>
+        <div class="field">
+          <label for="f-color">Color</label>
+          <select id="f-color" name="color">
+            {colors.map((c) => <option value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-material">Material</label>
+          <select id="f-material" name="material">
+            {MATERIALS.map((m) => <option value={m}>{m}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-size">Size or scale <span class="opt">optional</span></label>
+          <input id="f-size" type="text" name="size_notes" placeholder="e.g. about 6 in tall, or 100%" />
+        </div>
+        <div class="field">
+          <label for="f-date">Needed by <span class="opt">optional</span></label>
+          <input id="f-date" type="date" name="needed_by" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-details">Anything else? <span class="opt">optional</span></label>
+        <textarea id="f-details" name="details" rows="4" placeholder="Who it is for, what it needs to fit, a color you saw somewhere…"></textarea>
+      </div>
+
+      <div class="form-foot">
+        <button type="submit" class="btn btn-signal form-submit">Send the request →</button>
+        <p class="form-status" role="status" aria-live="polite" hidden></p>
+      </div>
+    </form>
+
+    <div class="form-done" hidden>
+      <p class="eyebrow eyebrow-glass">Got it</p>
+      <h3 class="display form-done-title">Request <em data-done-id></em> is in.</h3>
+      <p class="form-done-body">
+        A confirmation with your tracking link is on its way to <span data-done-email></span>.
+        You can also follow it here:
+      </p>
+      <a class="btn btn-paper" data-done-link href="/track">Track this request</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .request { background: var(--ink); color: var(--paper); padding-block: 104px; }
+  .request-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    gap: 64px;
+    align-items: start;
+  }
+  .request-title { margin-top: 18px; font-size: clamp(36px, 6vw, 60px); }
+  .request-lead { margin-top: 20px; color: var(--paper-72); line-height: 1.6; max-width: 400px; }
+  .request-notes {
+    margin-top: 32px;
+    list-style: none;
+    display: grid;
+    gap: 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--paper-60);
+    padding-left: 18px;
+    border-left: 2px solid var(--seaglass);
+  }
+  .request-notes strong { color: var(--paper); font-weight: 600; }
+
+  .form { display: flex; flex-direction: column; gap: 16px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row-3 { grid-template-columns: 0.6fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper-60);
+  }
+  .opt { color: var(--paper-30); }
+  .form input, .form textarea, .form select {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--paper);
+    background: var(--field-bg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius-field);
+    padding: 13px 16px;
+    outline: none;
+    width: 100%;
+    transition: border-color var(--ease), background var(--ease);
+    color-scheme: dark;
+  }
+  .form select option { color: var(--ink); background: var(--paper); }
+  .form textarea { resize: vertical; min-height: 110px; }
+  .form input::placeholder, .form textarea::placeholder { color: var(--paper-30); }
+  .form input:focus, .form textarea:focus, .form select:focus {
+    border-color: var(--seaglass);
+    background: rgba(238, 240, 234, 0.09);
+  }
+  .field.invalid input { border-color: var(--bad); }
+  .field-error {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--bad);
+  }
+  .form-foot { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 6px; }
+  .form-submit.is-sending { cursor: progress; }
+  .form-status { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; }
+  .form-status.is-error { color: var(--bad); }
+
+  .form-done {
+    background: var(--ink-soft);
+    border: 1px solid var(--paper-16);
+    border-radius: var(--radius-card);
+    padding: 40px;
+  }
+  .form-done-title { margin-top: 14px; font-size: clamp(30px, 4vw, 44px); }
+  .form-done-title em { color: var(--seaglass); }
+  .form-done-body { margin: 18px 0 26px; color: var(--paper-72); line-height: 1.6; }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  @media (max-width: 900px) {
+    .request { padding-block: 80px; }
+    .request-inner { grid-template-columns: 1fr; gap: 40px; }
+  }
+  @media (max-width: 560px) {
+    .row, .row-3 { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('request-form') as HTMLFormElement | null;
+  if (form) {
+    const status = form.querySelector('.form-status') as HTMLElement;
+    const submitBtn = form.querySelector('.form-submit') as HTMLButtonElement;
+    const done = document.querySelector('.form-done') as HTMLElement;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const setError = (name: string, msg: string | null) => {
+      const field = form.querySelector(`[name="${name}"]`)?.closest('.field');
+      const errEl = form.querySelector(`[data-error-for="${name}"]`) as HTMLElement | null;
+      if (!field || !errEl) return;
+      field.classList.toggle('invalid', !!msg);
+      errEl.textContent = msg ?? '';
+      errEl.hidden = !msg;
+    };
+    const setStatus = (msg: string, kind: '' | 'error') => {
+      status.textContent = msg;
+      status.className = 'form-status' + (kind ? ` is-${kind}` : '');
+      status.hidden = !msg;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const data: Record<string, string> = {};
+      fd.forEach((v, k) => (data[k] = String(v ?? '').trim()));
+
+      let ok = true;
+      if (!data.name) { setError('name', 'Please add your name.'); ok = false; } else setError('name', null);
+      if (!emailRe.test(data.email)) { setError('email', 'Enter a valid email so I can send updates.'); ok = false; } else setError('email', null);
+      if (!data.title) { setError('title', 'Tell me what it is.'); ok = false; } else setError('title', null);
+      if (data.file_url && !/^https?:\/\//i.test(data.file_url)) { setError('file_url', 'Links start with http:// or https://'); ok = false; } else setError('file_url', null);
+      if (!ok) return;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('is-sending');
+      submitBtn.textContent = 'Sending…';
+      setStatus('', '');
+
+      try {
+        const res = await fetch('/api/requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body?.error || `Request failed (${res.status})`);
+        form.hidden = true;
+        (done.querySelector('[data-done-id]') as HTMLElement).textContent = body.short_id;
+        (done.querySelector('[data-done-email]') as HTMLElement).textContent = data.email;
+        (done.querySelector('[data-done-link]') as HTMLAnchorElement).href = `/track?t=${encodeURIComponent(body.token)}`;
+        done.hidden = false;
+        done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        setStatus(
+          (err as Error).message || 'Something went wrong. Text me the link instead and I will add it by hand.',
+          'error',
+        );
+        submitBtn.classList.remove('is-sending');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send the request →';
+      }
+    });
+
+    form.querySelectorAll('input, textarea').forEach((el) => {
+      el.addEventListener('input', () => setError((el as HTMLInputElement).name, null));
+    });
+  }
+</script>

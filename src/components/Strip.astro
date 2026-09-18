@@ -1,0 +1,40 @@
+---
+const items = ['PLA', 'PETG', 'TPU', 'Multi-color', 'Up to 250 mm', 'Free for friends'];
+---
+
+<section class="strip">
+  <div class="strip-inner container">
+    {items.map((item, i) => (
+      <span class="strip-item">
+        {i > 0 && <span class="strip-sep" aria-hidden="true">/</span>}
+        {item}
+      </span>
+    ))}
+  </div>
+</section>
+
+<style>
+  .strip {
+    background: var(--ink-deep);
+    color: var(--paper);
+    border-top: 1px solid var(--hairline);
+  }
+  .strip-inner {
+    padding-block: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px 36px;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--paper-45);
+  }
+  .strip-sep { color: var(--seaglass); margin-right: 36px; }
+  @media (max-width: 600px) {
+    .strip-sep { display: none; }
+    .strip-inner { gap: 12px 24px; }
+  }
+</style>

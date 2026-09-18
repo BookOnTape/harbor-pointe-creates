@@ -1,0 +1,323 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { STATUSES, TRACK_STEPS } from '../../shared/statuses.js';
+---
+
+<Base title="Track a request — Harbor Pointe Creates" noindex>
+  <section class="track">
+    <Nav />
+    <div class="container track-body">
+      <!-- No token: ask for the link -->
+      <div class="lookup" data-view="lookup" hidden>
+        <p class="eyebrow eyebrow-glass">Track a request</p>
+        <h1 class="display track-title">Paste your <em>tracking link.</em></h1>
+        <p class="track-lead">It is in the confirmation email. The code after <code>?t=</code> works too.</p>
+        <form class="lookup-form">
+          <input type="text" name="t" placeholder="https://…/track?t=abc123 or abc123" aria-label="Tracking link or code" />
+          <button type="submit" class="btn btn-signal">Look it up</button>
+        </form>
+        <p class="lookup-error" role="alert" hidden></p>
+      </div>
+
+      <!-- Loading / not found -->
+      <div class="state" data-view="loading"><p class="eyebrow eyebrow-glass">Looking it up…</p></div>
+      <div class="state" data-view="missing" hidden>
+        <p class="eyebrow eyebrow-glass">Hmm</p>
+        <h1 class="display track-title">No request <em>on that link.</em></h1>
+        <p class="track-lead">Double-check the email, or <a href="/track">try the code again</a>.</p>
+      </div>
+
+      <!-- The request -->
+      <div class="req" data-view="request" hidden>
+        <div class="req-head">
+          <div>
+            <p class="eyebrow eyebrow-glass"><span data-f="short_id"></span> · requested <span data-f="created"></span></p>
+            <h1 class="display track-title" data-f="title"></h1>
+            <p class="req-meta"><span data-f="meta"></span></p>
+          </div>
+          <div class="req-status">
+            <span class="req-status-label" data-f="status_label"></span>
+            <span class="req-eta" data-f="eta" hidden></span>
+          </div>
+        </div>
+
+        <!-- Live progress (only while printing) -->
+        <div class="live" data-live hidden>
+          <div class="live-cam" data-cam hidden>
+            <img alt="Live view of the printer" data-cam-img />
+            <span class="live-cam-stamp" data-cam-stamp></span>
+          </div>
+          <div class="live-info">
+            <p class="eyebrow eyebrow-glass"><span class="live-dot"></span>Live from the printer</p>
+            <div class="live-pct" data-live-pct>—</div>
+            <div class="live-bar"><div class="live-fill" data-live-fill></div></div>
+            <div class="live-meta">
+              <span data-live-eta></span>
+              <span data-live-at></span>
+            </div>
+            <p class="live-note" data-cam-note hidden>Camera is off for this one. Progress still updates.</p>
+          </div>
+        </div>
+
+        <!-- Aside notice for on hold / declined -->
+        <div class="aside" data-aside hidden>
+          <strong data-aside-label></strong>
+          <span data-aside-blurb></span>
+        </div>
+
+        <!-- Timeline -->
+        <ol class="steps" data-steps>
+          {TRACK_STEPS.map((k) => (
+            <li class="step" data-step={k}>
+              <span class="step-dot" aria-hidden="true"></span>
+              <div class="step-body">
+                <div class="step-label">{STATUSES[k].label}</div>
+                <div class="step-when" data-when></div>
+                <div class="step-notes" data-notes></div>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <p class="req-foot">
+          Questions or a change of plan? Just reply to any of the emails.
+          <a href="/#request">Request another print →</a>
+        </p>
+      </div>
+    </div>
+  </section>
+  <Footer />
+</Base>
+
+<style>
+  .track { background: var(--ink); color: var(--paper); min-height: 80vh; }
+  .track-body { padding-block: 40px 120px; max-width: 860px; }
+  .track-title { margin-top: 16px; font-size: clamp(32px, 5.5vw, 54px); }
+  .track-lead { margin-top: 18px; color: var(--paper-72); line-height: 1.6; }
+  .track-lead a { color: var(--seaglass); }
+  code { font-family: var(--font-mono); font-size: 0.9em; color: var(--seaglass); }
+
+  .lookup-form { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .lookup-form input {
+    flex: 1 1 320px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--paper);
+    background: var(--field-bg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius-field);
+    padding: 14px 16px;
+    outline: none;
+  }
+  .lookup-form input:focus { border-color: var(--seaglass); }
+  .lookup-error { margin-top: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--bad); }
+  .state { padding-block: 40px; }
+
+  .req-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+  .req-meta { margin-top: 12px; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; color: var(--paper-60); }
+  .req-status { text-align: right; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .req-status-label {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--seaglass);
+    padding: 9px 14px;
+    border-radius: var(--radius-pill);
+  }
+  .req-status-label.tone-active { background: var(--signal); }
+  .req-status-label.tone-warn { background: var(--warn); }
+  .req-status-label.tone-bad { background: var(--bad); color: var(--paper); }
+  .req-eta { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--paper-60); }
+
+  .live {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 0;
+    background: var(--ink-soft);
+    border: 1px solid var(--paper-16);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .live-cam { position: relative; background: #000; min-height: 240px; }
+  .live-cam img { width: 100%; height: 100%; object-fit: cover; }
+  .live-cam-stamp {
+    position: absolute; left: 12px; bottom: 10px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+    color: var(--paper-72); background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px;
+  }
+  .live-info { padding: 26px 28px; display: flex; flex-direction: column; justify-content: center; }
+  .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--signal); margin-right: 9px; animation: blink 1.6s infinite; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+  .live-pct { margin-top: 12px; font-family: var(--font-display); font-size: 64px; letter-spacing: -0.04em; line-height: 1; }
+  .live-bar { margin-top: 16px; height: 8px; border-radius: 4px; background: var(--paper-16); overflow: hidden; }
+  .live-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--seaglass), var(--signal)); transition: width 600ms ease; }
+  .live-meta { margin-top: 10px; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10.5px; color: var(--paper-60); }
+  .live-note { margin-top: 14px; font-size: 13px; color: var(--paper-45); }
+
+  .aside {
+    margin-top: 36px;
+    padding: 18px 20px;
+    border-left: 3px solid var(--warn);
+    background: var(--ink-soft);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+    line-height: 1.55;
+    color: var(--paper-72);
+  }
+  .aside strong { display: block; color: var(--paper); margin-bottom: 4px; }
+  .aside.tone-bad { border-color: var(--bad); }
+
+  .steps { margin-top: 44px; list-style: none; position: relative; padding-left: 4px; }
+  .step { display: grid; grid-template-columns: 24px 1fr; gap: 16px; padding-bottom: 26px; position: relative; }
+  .step::before {
+    content: ''; position: absolute; left: 11px; top: 18px; bottom: -4px; width: 2px; background: var(--paper-16);
+  }
+  .step:last-child::before { display: none; }
+  .step-dot {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid var(--paper-30); background: var(--ink);
+    display: grid; place-items: center; position: relative; z-index: 1;
+  }
+  .step.done .step-dot { background: var(--seaglass); border-color: var(--seaglass); }
+  .step.done::before { background: var(--seaglass); }
+  .step.now .step-dot { background: var(--signal); border-color: var(--signal); box-shadow: 0 0 0 6px rgba(255,122,69,0.18); }
+  .step-label { font-family: var(--font-display); font-size: 20px; letter-spacing: -0.02em; color: var(--paper-45); padding-top: 1px; }
+  .step.done .step-label, .step.now .step-label { color: var(--paper); }
+  .step-when { margin-top: 4px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; color: var(--paper-45); }
+  .step-notes { margin-top: 6px; display: grid; gap: 6px; }
+  .step-notes p { font-size: 14.5px; line-height: 1.55; color: var(--paper-72); padding: 10px 14px; background: var(--ink-soft); border-radius: 6px; border: 1px solid var(--hairline); }
+  .req-foot { margin-top: 24px; font-size: 14px; color: var(--paper-60); line-height: 1.6; }
+  .req-foot a { color: var(--seaglass); text-decoration: none; margin-left: 8px; }
+
+  @media (max-width: 720px) {
+    .live { grid-template-columns: 1fr; }
+    .live-cam { min-height: 200px; }
+    .req-status { align-items: flex-start; text-align: left; }
+  }
+</style>
+
+<script>
+  import { STATUSES, TRACK_STEPS } from '../../shared/statuses.js';
+
+  const root = document.querySelector('.track-body') as HTMLElement;
+  const view = (name: string) =>
+    root.querySelectorAll<HTMLElement>('[data-view]').forEach((el) => (el.hidden = el.dataset.view !== name));
+  const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const fmtDay = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+  const fmtEta = (s: number | null) => {
+    if (s === null || s === undefined) return '';
+    const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+    return h ? `~${h}h ${m}m left` : `~${m}m left`;
+  };
+
+  const params = new URLSearchParams(location.search);
+  let token = (params.get('t') || '').trim();
+
+  const lookupForm = root.querySelector<HTMLFormElement>('.lookup-form')!;
+  lookupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const raw = String(new FormData(lookupForm).get('t') || '').trim();
+    const m = raw.match(/[?&]t=([a-z0-9]+)/i);
+    const t = (m ? m[1] : raw).toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!t) return;
+    location.search = `?t=${t}`;
+  });
+
+  let pollTimer: number | undefined;
+
+  async function load() {
+    const res = await fetch(`/api/track/${encodeURIComponent(token)}`, { cache: 'no-store' });
+    if (res.status === 404) { view('missing'); return; }
+    if (!res.ok) { view('missing'); return; }
+    const d = await res.json();
+    render(d);
+    view('request');
+    if (d.status === 'printing') {
+      pollTimer = window.setTimeout(load, 30_000);
+    }
+  }
+
+  function render(d: any) {
+    $('[data-f="short_id"]').textContent = d.short_id;
+    $('[data-f="created"]').textContent = fmtDay(d.created_at);
+    $('[data-f="title"]').textContent = d.title;
+    $('[data-f="meta"]').textContent = [
+      `${d.quantity}×`, d.color || 'any color', d.material && d.material !== 'Any' ? d.material : null,
+    ].filter(Boolean).join(' · ');
+
+    const st = STATUSES[d.status as keyof typeof STATUSES];
+    const label = $('[data-f="status_label"]');
+    label.textContent = st?.label ?? d.status;
+    label.className = `req-status-label tone-${st?.tone ?? 'neutral'}`;
+    const eta = $('[data-f="eta"]');
+    if (d.eta && !st?.terminal) { eta.textContent = `est. ready ${d.eta}`; eta.hidden = false; } else eta.hidden = true;
+
+    // live block
+    const live = $('[data-live]');
+    if (d.progress) {
+      live.hidden = false;
+      const pct = d.progress.percent ?? 0;
+      $('[data-live-pct]').textContent = `${Math.round(pct)}%`;
+      ($('[data-live-fill]') as HTMLElement).style.width = `${pct}%`;
+      $('[data-live-eta]').textContent = d.progress.state === 'printing' ? fmtEta(d.progress.eta_seconds) : d.progress.state;
+      $('[data-live-at]').textContent = `updated ${fmtDate(d.progress.at)}`;
+      const cam = $('[data-cam]');
+      if (d.snapshot) {
+        cam.hidden = false;
+        $('[data-cam-note]').hidden = true;
+        ($('[data-cam-img]') as HTMLImageElement).src = `/api/track/${encodeURIComponent(token)}/snapshot?ts=${Date.now()}`;
+        $('[data-cam-stamp]').textContent = fmtDate(d.snapshot.at);
+      } else {
+        cam.hidden = true;
+        $('[data-cam-note]').hidden = false;
+      }
+    } else live.hidden = true;
+
+    // aside states
+    const aside = $('[data-aside]');
+    if (st?.aside) {
+      aside.hidden = false;
+      aside.className = `aside tone-${st.tone}`;
+      $('[data-aside-label]').textContent = st.label;
+      $('[data-aside-blurb]').textContent = st.blurb;
+    } else aside.hidden = true;
+
+    // timeline
+    const reached = new Map<string, string>();
+    const notes = new Map<string, string[]>();
+    let lastStatus = 'received';
+    for (const e of d.events) {
+      if (e.status) { if (!reached.has(e.status)) reached.set(e.status, e.at); lastStatus = e.status; }
+      if (e.note) {
+        const key = e.status || lastStatus;
+        notes.set(key, [...(notes.get(key) || []), e.note]);
+      }
+    }
+    const curOrder = st?.aside ? -1 : (st?.order ?? 0);
+    root.querySelectorAll<HTMLElement>('.step').forEach((li) => {
+      const k = li.dataset.step as keyof typeof STATUSES;
+      const o = STATUSES[k].order;
+      li.classList.toggle('done', o < curOrder || (o === curOrder && !!STATUSES[k].terminal));
+      li.classList.toggle('now', o === curOrder && !STATUSES[k].terminal);
+      const when = li.querySelector('[data-when]')!;
+      when.textContent = reached.has(k) ? fmtDate(reached.get(k)!) : '';
+      const n = li.querySelector('[data-notes]')!;
+      const list = (notes.get(k) || []).filter((x) => !x.startsWith('✉ ') || true);
+      n.innerHTML = list.map((x) => `<p>${x.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!))}</p>`).join('');
+    });
+    // Notes attached to aside states (on hold / declined) show under the aside.
+    if (st?.aside && notes.get(d.status)?.length) {
+      $('[data-aside-blurb]').textContent = notes.get(d.status)!.at(-1)!;
+    }
+  }
+
+  if (!token) view('lookup');
+  else load().catch(() => view('missing'));
+</script>
