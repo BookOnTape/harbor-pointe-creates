@@ -23,7 +23,7 @@
     {
       "binding": "DB",
       "database_name": "harbor-pointe-creates",
-      "database_id": "REPLACE_WITH_D1_ID",
+      "database_id": "edcbb162-6a8f-4e7f-9add-a688db87ef14",
       "migrations_dir": "migrations"
     }
   ],
