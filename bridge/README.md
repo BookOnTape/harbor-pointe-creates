@@ -14,6 +14,36 @@ python3 bridge.py                     # loop
 
 `config.yaml` is git-ignored because it holds the printer token and access code.
 
+## Where it runs: joecool (the Beelink), as a container
+
+Decided 2026-09-18. Not BeagleScout: that board's job is to never change (it is
+the DNS fallback and the thing that reports joecool down), and the bridge has
+no reason to live next to Homebridge. joecool already has Docker with capped
+logging, CasaOS tiles, the graceful-shutdown script, and a Claude Code session
+that can reach the printer for testing.
+
+```bash
+# on joecool, once
+gh repo clone BookOnTape/harbor-pointe-creates ~/projects/harbor-pointe-creates
+sudo mkdir -p /DATA/AppData/hpc-bridge
+sudo cp ~/projects/harbor-pointe-creates/bridge/config.example.yaml /DATA/AppData/hpc-bridge/config.yaml
+sudo chmod 600 /DATA/AppData/hpc-bridge/config.yaml
+sudoedit /DATA/AppData/hpc-bridge/config.yaml     # printer IP, access code, site url + printer_token
+
+cd ~/projects/harbor-pointe-creates/bridge
+docker compose up -d --build
+docker logs -f hpc-bridge                           # expect: "elegoo connected: CC2Printer at <ip>"
+```
+
+The container has no ports, no media-drive mounts, and nothing to back up; the
+config file is the only state and it holds two secrets, hence the `600`.
+`restart: unless-stopped` brings it back after joecool's reboots, and the site
+keeps the last known progress while it is down. Give the printer a DHCP
+reservation on the Fios router first and name it in AdGuard on both instances
+(`APP-Office-CentauriCarbon2` fits the scheme in `media/docs/home-network-devices.md`).
+
+To run it bare instead of in Docker, see the venv block below.
+
 ## Elegoo Centauri Carbon 2 notes
 
 - Settings → Network on the touchscreen: enable **LAN Only** and copy the

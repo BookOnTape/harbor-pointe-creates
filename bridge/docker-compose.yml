@@ -1,0 +1,48 @@
+# Harbor Pointe Creates — printer bridge, as a container on joecool.
+#
+# Polls the Centauri Carbon 2 on the LAN and posts progress + camera frames to
+# creates.harborpointedesigns.com. No ports, no volumes on the media drives,
+# no state worth backing up: the config file is the only thing it owns.
+#
+# One-time setup on the box (paths hardcoded on purpose — no $AppID here):
+#   sudo mkdir -p /DATA/AppData/hpc-bridge
+#   sudo cp ~/projects/harbor-pointe-creates/bridge/config.example.yaml /DATA/AppData/hpc-bridge/config.yaml
+#   sudo chmod 600 /DATA/AppData/hpc-bridge/config.yaml   # holds the printer token + access code
+#   (edit it: printer IP, access code, site printer_token)
+#
+# Run:  cd ~/projects/harbor-pointe-creates/bridge && docker compose up -d --build
+# Logs: docker logs -f hpc-bridge
+# Update: git pull && docker compose up -d --build
+
+services:
+  hpc-bridge:
+    build: .
+    image: hpc-bridge:local
+    container_name: hpc-bridge
+    restart: unless-stopped
+    init: true
+    environment:
+      TZ: "America/New_York"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - /DATA/AppData/hpc-bridge:/config:ro
+    # The box's /etc/docker/daemon.json already caps json-file logs at 50m x 3
+    # (post-incident 2026-07-29). Restating it here so the cap survives even if
+    # that file is ever lost, and so this compose is honest about its footprint.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # It only ever talks out: printer on the LAN, site over HTTPS.
+    mem_limit: 256m
+    cpus: "0.5"
+
+# CasaOS tile metadata only (icon + no click-through: there is no web UI).
+x-casaos:
+  main: hpc-bridge
+  title:
+    en_us: Print bridge (Harbor Pointe Creates)
+  icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/octoprint.png
+  description:
+    en_us: Posts Centauri Carbon 2 progress + snapshots to the print-request site
