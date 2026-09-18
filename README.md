@@ -111,11 +111,20 @@ Adapters:
 
 | `kind` | Status | Camera |
 | --- | --- | --- |
+| `elegoo` | Centauri Carbon 2 (JSON-RPC over MQTT `:1883`, access code) and Centauri Carbon (SDCP `:3030`), via [pycentauri](https://pypi.org/project/pycentauri/) | The printer's own MJPEG stream (`:8080` on CC2, `:3031` on CC1) |
 | `moonraker` | Klipper / Mainsail / Fluidd / most Creality K-series | Moonraker's configured webcam, or `snapshot_url` |
 | `octoprint` | OctoPrint REST API | `/webcam/?action=snapshot`, or `snapshot_url` |
 | `bambu` | LAN MQTT (`bblp` + access code) | P1/A1: TCP-6000 stream. X1/H2: RTSP via `ffmpeg`. |
 | `prusalink` | PrusaLink (MK4 / XL / Mini) | `snapshot_url` only (no camera API) |
 | `demo` | Fakes a 0→100% print | Draws a placeholder frame |
+
+**Centauri Carbon 2 setup:** on the printer, Settings → Network: turn on
+**LAN Only** mode and note the **access code**. Give the printer a fixed IP on
+your router. Put both in `bridge/config.yaml` under `kind: elegoo`. Without
+LAN Only the local API stays closed and the bridge logs a connect timeout.
+The CC2's Canvas (4-spool) system is read every few minutes and the active
+tray's brand, material, and color are printed in the bridge log, which is handy
+when you fill in the filament log afterwards.
 
 Any adapter can override the camera with `snapshot_url` (a JPEG or MJPEG URL)
 or `snapshot_cmd` (a shell command that writes a JPEG to `{out}`).

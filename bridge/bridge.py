@@ -13,7 +13,8 @@ reports what the printer says. If nothing is marked current, it idles.
     python3 bridge.py            # uses ./config.yaml
     python3 bridge.py -c other.yaml --once   # single poll, handy for testing
 
-Adapters: moonraker (Klipper), octoprint, bambu (MQTT + camera), prusalink.
+Adapters: elegoo (Centauri Carbon 1/2), moonraker (Klipper), octoprint,
+bambu (MQTT + camera), prusalink, demo.
 Camera fallbacks for any printer: snapshot_url (JPEG over HTTP) or snapshot_cmd.
 """
 import argparse
@@ -338,7 +339,116 @@ class Demo:
         im.save(out, "JPEG", quality=80)
         return out.getvalue()
 
-ADAPTERS = {"demo": Demo, "moonraker": Moonraker, "octoprint": OctoPrint, "bambu": Bambu, "prusalink": PrusaLink}
+
+class Elegoo:
+    """
+    Elegoo Centauri Carbon (CC1) and Centauri Carbon 2 (CC2) via pycentauri,
+    which auto-detects the model. The CC2 speaks JSON-RPC over MQTT on :1883
+    with the access code from the printer screen as the password, and serves
+    an MJPEG stream on :8080. The CC1 is SDCP over WebSocket on :3030 with
+    MJPEG on :3031 and no auth.
+
+    CC2: turn on "LAN Only" mode in the printer's network settings first,
+    otherwise the local API stays closed and you get a connect timeout.
+
+    pycentauri is async; the bridge is not, so the client lives on a private
+    event loop in a background thread and reconnects itself after errors.
+    """
+
+    # PrintInfo.Status codes (pycentauri.models.PrintStatus) → bridge states
+    _STATE = {
+        0: "idle", 5: "paused", 6: "paused", 12: "paused",
+        7: "cancelled", 8: "cancelled", 9: "complete", 14: "error",
+        27: "filament swap", 28: "filament swap", 29: "filament swap",
+    }
+
+    def __init__(self, cfg):
+        import asyncio
+
+        self.host = cfg["host"]
+        self.code = str(cfg.get("access_code", "") or "")
+        self._printer = None
+        self._loop = asyncio.new_event_loop()
+        threading.Thread(target=self._loop.run_forever, name="elegoo-loop", daemon=True).start()
+        self._last_canvas_log = 0.0
+
+    def _run(self, coro, timeout=30):
+        import asyncio
+
+        return asyncio.run_coroutine_threadsafe(coro, self._loop).result(timeout)
+
+    async def _ensure(self):
+        if self._printer is not None:
+            return self._printer
+        from pycentauri.connect import connect_auto
+
+        self._printer = await connect_auto(self.host, access_code=self.code or None, connect_timeout=10)
+        log(f"elegoo connected: {type(self._printer).__name__} at {self.host}")
+        return self._printer
+
+    async def _drop(self):
+        p, self._printer = self._printer, None
+        if p is not None:
+            try:
+                await p.close()
+            except Exception:  # noqa: BLE001
+                pass
+
+    async def _status(self):
+        p = await self._ensure()
+        st = await p.status()
+        code = st.print_status if st.print_status is not None else 0
+        state = self._STATE.get(code, "printing")
+        pct = float(st.progress) if st.progress is not None else None
+        pi = st.print_info
+        eta = None
+        cc2 = st.raw.get("_cc2") if isinstance(st.raw, dict) else None
+        if cc2 and cc2.get("remaining_time_sec") is not None:
+            eta = int(cc2["remaining_time_sec"])
+        elif pi and pi.total_ticks and pi.current_ticks is not None:
+            eta = int(max(0, pi.total_ticks - pi.current_ticks))
+        if state == "idle" and pct and 0 < pct < 100 and (st.filename or ""):
+            state = "printing"  # firmware blips idle between sub-states
+        out = {"state": state, "percent": pct, "eta_seconds": eta, "file": st.filename or None}
+        if pi and pi.current_layer is not None and pi.total_layer:
+            out["layer"] = f"{pi.current_layer}/{pi.total_layer}"
+        # Log which Canvas tray is feeding, every few minutes, so the console
+        # shows material + color for the filament log later.
+        if hasattr(p, "canvas_status") and time.time() - self._last_canvas_log > 300 and state == "printing":
+            try:
+                cs = await p.canvas_status()
+                for unit in cs.canvas_list:
+                    for t in unit.tray_list:
+                        if t.tray_id == cs.active_tray_id and t.status:
+                            log(f"canvas tray {t.tray_id}: {t.brand} {t.filament_type} {t.filament_color}".strip())
+                self._last_canvas_log = time.time()
+            except Exception as e:  # noqa: BLE001
+                log("canvas status failed:", e)
+        return out
+
+    def status(self):
+        try:
+            return self._run(self._status())
+        except Exception as e:  # noqa: BLE001
+            log("elegoo status failed, will reconnect:", e)
+            try:
+                self._run(self._drop(), timeout=10)
+            except Exception:  # noqa: BLE001
+                pass
+            return None  # skip this poll rather than report a false "idle"
+
+    async def _snapshot(self):
+        p = await self._ensure()
+        return await p.snapshot(timeout=15)
+
+    def snapshot(self):
+        try:
+            return self._run(self._snapshot(), timeout=25)
+        except Exception as e:  # noqa: BLE001
+            log("elegoo snapshot failed:", e)
+            return None
+
+ADAPTERS = {"demo": Demo, "elegoo": Elegoo, "moonraker": Moonraker, "octoprint": OctoPrint, "bambu": Bambu, "prusalink": PrusaLink}
 
 
 # ---------------------------------------------------------------------------
@@ -388,13 +498,15 @@ def main():
         try:
             current = site.current()
             st = printer.status()
-            if not current:
+            if st is None:
+                log("printer unreachable this poll; keeping last known progress")
+            elif not current:
                 if st["state"] != last_state:
                     log("printer:", st["state"], "· no current request in admin, idling")
                     last_state = st["state"]
             else:
                 payload = {"request_id": current["id"], **st}
-                want_snap = st["state"] in ("printing", "paused", "complete") and (time.time() - last_snap) >= snap_every
+                want_snap = st["state"] in ("printing", "paused", "complete", "filament swap") and (time.time() - last_snap) >= snap_every
                 if want_snap:
                     frame = None
                     if snapshot_cmd:

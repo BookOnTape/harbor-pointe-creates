@@ -15,10 +15,16 @@ snapshot_jpeg_quality: 72
 # tracking page light up before the real printer is wired in.
 
 printer:
-  kind: moonraker                # Klipper / Mainsail / Fluidd / Creality K1 etc.
-  host: http://192.168.1.50      # Moonraker base URL (port 7125 if not proxied)
-  api_key: ""                    # only if you enabled Moonraker auth
-  snapshot_url: ""               # blank = ask Moonraker for its configured webcam
+  kind: elegoo                   # Centauri Carbon 2 (also the original Centauri Carbon)
+  host: 192.168.1.50             # printer IP; give it a DHCP reservation on your router
+  access_code: "Ab3dEf"          # CC2 only: printer screen → Settings → Network. Turn on "LAN Only" mode there too.
+  # Camera comes from the printer's own MJPEG stream (:8080 on CC2, :3031 on CC1). Nothing to configure.
+
+# printer:
+#   kind: moonraker              # Klipper / Mainsail / Fluidd / Creality K1 etc.
+#   host: http://192.168.1.50    # Moonraker base URL (port 7125 if not proxied)
+#   api_key: ""                  # only if you enabled Moonraker auth
+#   snapshot_url: ""             # blank = ask Moonraker for its configured webcam
 
 # printer:
 #   kind: octoprint

@@ -14,6 +14,19 @@ python3 bridge.py                     # loop
 
 `config.yaml` is git-ignored because it holds the printer token and access code.
 
+## Elegoo Centauri Carbon 2 notes
+
+- Settings → Network on the touchscreen: enable **LAN Only** and copy the
+  **access code**. The bridge uses MQTT on port 1883 (user `elegoo`, password
+  = access code) and the camera on port 8080. No cloud account involved.
+- `python3 bridge.py --once` should log `elegoo connected: CC2Printer at <ip>`
+  followed by a state line. A connect timeout almost always means LAN Only is
+  off or the IP changed; a "connection refused" means the access code is wrong.
+- The original Centauri Carbon works with the same `kind: elegoo` block and no
+  access code.
+- pycentauri is alpha and tracks Elegoo firmware changes closely. If a
+  firmware update breaks status, `pip install -U pycentauri` first.
+
 ## Bambu Lab notes
 
 - LAN mode is not required, but the printer must be reachable on your LAN.
