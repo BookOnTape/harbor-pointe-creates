@@ -37,7 +37,7 @@
     "CONTACT_FROM": "Harbor Pointe Creates <creates@harborpointedesigns.com>",
     // Your Cloudflare Access team domain, e.g. "harborpointe.cloudflareaccess.com".
     // Leave empty to skip Access and rely on ADMIN_TOKEN only.
-    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_TEAM_DOMAIN": "weiner-lapointe.cloudflareaccess.com",
     // Default spool price used for the filament cost "what-ifs" (USD per kg).
     "SPOOL_PRICE_PER_KG": "22"
   }
