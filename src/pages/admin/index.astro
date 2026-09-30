@@ -29,6 +29,13 @@ import { BOARD_COLUMNS, STATUSES, MATERIALS } from '../../../shared/statuses.js'
     <main class="main">
       <!-- BOARD -->
       <section class="board" data-panel="board">
+        <nav class="col-picker" data-col-picker aria-label="Board column">
+          {BOARD_COLUMNS.map((k) => (
+            <button type="button" class="col-pick" data-col-pick={k}>
+              <span class={`col-dot tone-${STATUSES[k].tone}`}></span>{STATUSES[k].short}<span class="col-pick-n" data-count>0</span>
+            </button>
+          ))}
+        </nav>
         {BOARD_COLUMNS.map((k) => (
           <div class="col" data-col={k}>
             <div class="col-head">
@@ -176,7 +183,7 @@ import { BOARD_COLUMNS, STATUSES, MATERIALS } from '../../../shared/statuses.js'
                 <select name="priority"><option value="1">High</option><option value="0">Normal</option><option value="-1">Low</option></select>
               </label>
             </div>
-            <label class="lbl">Printer<input name="printer" placeholder="e.g. P1S, MK4" /></label>
+            <label class="lbl">Printer<input name="printer" placeholder="Centauri Carbon 2" /></label>
             <label class="lbl">Their notes<textarea name="details" rows="3" readonly></textarea></label>
             <label class="lbl">Private notes<textarea name="admin_notes" rows="3" placeholder="Slicer settings, where the file is, what went wrong…"></textarea></label>
             <div class="row-end"><button class="btn btn-outline-ink btn-sm" type="submit">Save details</button></div>
@@ -421,11 +428,90 @@ import { BOARD_COLUMNS, STATUSES, MATERIALS } from '../../../shared/statuses.js'
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--paper); font-family: var(--font-mono); font-size: 12px; padding: 12px 18px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
   .toast.is-bad { background: var(--bad); }
 
+  /* Grid children default to min-width:auto, which lets date inputs and long
+     placeholders push the drawer wider than the screen. Let them shrink. */
+  .grid-2 > *, .grid-3 > *, .grid-4 > * { min-width: 0; }
+  .lbl input, .lbl select, .lbl textarea { min-width: 0; max-width: 100%; }
+  .lbl input[type='date'] { -webkit-appearance: none; appearance: none; min-height: 40px; display: block; }
+
+  .col-picker { display: none; }
+  .col-empty { display: none; }
+
   @media (max-width: 800px) {
-    .topbar { flex-wrap: wrap; gap: 10px; }
-    .search { margin-left: 0; width: 100%; order: 10; }
+    /* Topbar: brand + printer + refresh on row one, tabs, then search. */
+    .topbar { flex-wrap: wrap; gap: 10px 12px; padding: 10px 16px; }
+    .topbar-right { margin-left: auto; gap: 8px; }
+    .tabs { order: 5; width: 100%; margin-left: 0; }
+    .tab { flex: 1; padding: 10px 8px; border-color: var(--paper-16); }
+    .search { margin-left: 0; width: 100%; order: 10; font-size: 16px; }
     .who { display: none; }
+    .main { padding: 14px 16px; }
+
+    /* Board: one column at a time, chosen from a scrollable chip row. */
+    .board { display: block; min-height: 0; overflow: visible; padding-bottom: 0; }
+    .col-picker {
+      display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+      margin: 0 -16px 12px; padding: 2px 16px 4px;
+      position: sticky; top: var(--topbar-h, 0px); z-index: 10; background: var(--paper-deep);
+    }
+    .col-picker::-webkit-scrollbar { display: none; }
+    .col-pick {
+      flex: none; display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ink); background: var(--paper); border: 1px solid var(--hairline-ink); border-radius: 99px;
+      padding: 9px 12px; cursor: pointer;
+    }
+    .col-pick.is-empty { color: var(--slate); background: transparent; }
+    .col-pick.is-active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .col-pick-n { color: inherit; opacity: 0.6; }
+    .col { display: none; background: none; padding: 0; }
+    .board[data-active-col='received'] [data-col='received'],
+    .board[data-active-col='reviewing'] [data-col='reviewing'],
+    .board[data-active-col='queued'] [data-col='queued'],
+    .board[data-active-col='printing'] [data-col='printing'],
+    .board[data-active-col='finishing'] [data-col='finishing'],
+    .board[data-active-col='ready'] [data-col='ready'],
+    .board[data-active-col='on_hold'] [data-col='on_hold'],
+    .board[data-active-col='delivered'] [data-col='delivered'],
+    .board[data-active-col='declined'] [data-col='declined'] { display: flex; }
+    .col-head { display: none; }
+    .col-cards { gap: 10px; }
+    .card-req { padding: 14px; }
+    .card-t { font-size: 19px; }
+    .card-m { font-size: 13px; }
+    .col-empty { display: block; padding: 40px 0; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--slate); }
+
+    /* List: keep ID / What / Who / Status / Needed, drop the rest. */
+    .list .table th:nth-child(n+5):not(:nth-child(9)),
+    .list .table td:nth-child(n+5):not(:nth-child(9)) { display: none; }
+    .list .table td { font-size: 13px; padding: 10px 8px; }
+
+    /* Drawer: full screen, sticky header, nothing wider than the phone. */
+    body.drawer-open { overflow: hidden; }
+    .drawer { width: 100vw; box-shadow: none; }
+    .drawer-head { padding: calc(14px + env(safe-area-inset-top)) 16px 14px; }
+    .drawer-title { font-size: 24px; }
+    .drawer-who { word-break: break-word; }
+    .drawer-head .icon-btn { width: 40px; height: 40px; flex: none; font-size: 20px; }
+    .drawer-body { padding: 0 16px calc(40px + env(safe-area-inset-bottom)); overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+    .next-row { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px 12px; padding: 0 16px 4px; scrollbar-width: none; }
+    .next-row::-webkit-scrollbar { display: none; }
+    .next-btn { flex: none; padding: 9px 12px; }
+    .lbl input, .lbl select, .lbl textarea, .msg-form input, .msg-form textarea { font-size: 16px; } /* no iOS focus zoom */
     .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .checks { gap: 10px 18px; }
+    .row-end { flex-direction: column; align-items: stretch; gap: 10px; }
+    .row-end .btn { width: 100%; justify-content: center; }
+    .row-end .hint { line-height: 1.5; }
+    .lbl-inline { margin-top: 0; }
+    .table-sm td { padding: 8px 6px; }
     .ev { grid-template-columns: 1fr; gap: 4px; }
+  }
+
+  @media (max-width: 480px) {
+    .details-form .grid-2 { grid-template-columns: 1fr; }
+    .log-form .grid-2 { grid-template-columns: 1fr; }
+    .topbar-tag { display: none; }
+    .printer-pill { padding: 6px 8px; }
   }
 </style>

@@ -69,6 +69,10 @@ $('[data-auth-form]').addEventListener('submit', async (e) => {
   }
 });
 
+/* Sticky board chips sit just under the (wrapping) topbar. */
+const topbar = $('.topbar');
+new ResizeObserver(() => document.documentElement.style.setProperty('--topbar-h', `${topbar.offsetHeight}px`)).observe(topbar);
+
 /* ---------------- tabs ---------------- */
 $$('.tab').forEach((t) =>
   t.addEventListener('click', () => {
@@ -113,15 +117,38 @@ function cardHtml(r: Req) {
   </button>`;
 }
 
+/* On phones the board shows one column at a time, picked from a chip row. */
+let activeCol = sessionStorage.getItem('hpc_board_col') || '';
+
+function setActiveCol(k: string) {
+  activeCol = k;
+  try { sessionStorage.setItem('hpc_board_col', k); } catch { /* private mode */ }
+  $('[data-panel="board"]').dataset.activeCol = k;
+  $$('[data-col-pick]').forEach((b) => b.classList.toggle('is-active', b.dataset.colPick === k));
+}
+
 function renderBoard() {
   const list = filtered();
   for (const k of BOARD_COLUMNS) {
     const col = $(`[data-col="${k}"]`);
     const rows = list.filter((r) => r.status === k);
     $('[data-count]', col).textContent = String(rows.length);
-    $('[data-cards]', col).innerHTML = rows.map(cardHtml).join('');
+    $('[data-cards]', col).innerHTML = rows.map(cardHtml).join('') || '<p class="col-empty">Nothing here.</p>';
+    const pick = $(`[data-col-pick="${k}"]`);
+    $('[data-count]', pick).textContent = String(rows.length);
+    pick.classList.toggle('is-empty', rows.length === 0);
   }
+  // Default to the earliest column that has work in it.
+  if (!activeCol || !BOARD_COLUMNS.includes(activeCol)) {
+    activeCol = BOARD_COLUMNS.find((k) => list.some((r) => r.status === k)) || BOARD_COLUMNS[0];
+  }
+  setActiveCol(activeCol);
 }
+
+$('[data-col-picker]').addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLElement>('[data-col-pick]');
+  if (b) setActiveCol(b.dataset.colPick!);
+});
 
 function renderList() {
   const list = filtered();
@@ -168,6 +195,7 @@ const scrim = $('[data-scrim]');
 const closeDrawer = () => {
   drawer.hidden = true;
   scrim.hidden = true;
+  document.body.classList.remove('drawer-open');
   open = null;
   history.replaceState(null, '', location.pathname);
 };
@@ -177,6 +205,7 @@ document.addEventListener('keydown', (e) => e.key === 'Escape' && !drawer.hidden
 
 async function openDrawer(id: number) {
   drawer.hidden = false;
+  document.body.classList.add('drawer-open');
   scrim.hidden = true; // keep the board visible/scrollable behind; drawer is wide enough
   history.replaceState(null, '', `#${id}`);
   await refreshDrawer(id);
@@ -232,7 +261,11 @@ async function refreshDrawer(id: number) {
   const df = $<HTMLFormElement>('[data-details-form]');
   for (const k of ['name', 'email', 'title', 'file_url', 'quantity', 'color', 'material', 'size_notes', 'needed_by', 'priority', 'printer', 'details', 'admin_notes']) {
     const el = df.elements.namedItem(k) as HTMLInputElement | null;
-    if (el) el.value = r[k] ?? (k === 'priority' ? '0' : k === 'material' ? 'Any' : '');
+    if (!el) continue;
+    const v = r[k] ?? (k === 'priority' ? '0' : k === 'material' ? 'Any' : '');
+    // Older requests may carry a material that's no longer offered (e.g. Resin): show it, don't blank it.
+    if (el instanceof HTMLSelectElement && v && ![...el.options].some((o) => o.value === String(v))) el.add(new Option(`${v} (retired)`, String(v)));
+    el.value = v;
   }
   const fl = $<HTMLAnchorElement>('[data-file-link]');
   fl.hidden = !r.file_url;

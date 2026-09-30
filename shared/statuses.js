@@ -96,6 +96,10 @@ export const BOARD_COLUMNS = [
   'declined',
 ];
 
-export const MATERIALS = ['Any', 'PLA', 'PETG', 'TPU', 'ABS/ASA', 'Resin'];
+/**
+ * Filament only: the shop is one Elegoo Centauri Carbon 2 (enclosed, hardened
+ * nozzle). Stick to spools you can grab off the shelf; ask about anything else.
+ */
+export const MATERIALS = ['Any', 'PLA', 'Matte PLA', 'Silk PLA', 'PLA-CF', 'PETG', 'PETG-CF', 'ABS', 'ASA', 'TPU'];
 
 export const isStatus = (s) => Object.prototype.hasOwnProperty.call(STATUSES, s);
