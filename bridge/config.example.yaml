@@ -2,7 +2,10 @@
 # printer: your Mac, a Raspberry Pi, the OctoPrint Pi itself.
 
 site:
-  url: https://creates.harborpointedesigns.com   # or http://127.0.0.1:8787 for local dev
+  # The workers.dev address, not creates.harborpointedesigns.com: that zone runs
+  # Bot Fight Mode, which challenges python-requests and can't be skipped on the
+  # free plan. Same Worker; PRINTER_TOKEN still gates /api/printer.
+  url: https://harbor-pointe-creates.weiner-lapointe.workers.dev   # or http://127.0.0.1:8787 for local dev
   printer_token: change-me                        # must match the Worker's PRINTER_TOKEN secret
 
 # How often to post progress, and how often to include a camera frame.
