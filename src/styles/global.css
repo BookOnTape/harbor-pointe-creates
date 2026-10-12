@@ -1,7 +1,8 @@
 /* ============================================================
    Harbor Pointe Creates — design tokens + base
-   Sibling of the Designs site: same type family (Fraunces /
-   JetBrains Mono / Archivo), new palette and rhythm.
+   Sibling of the Designs site: same type family (Anisette Std Petite /
+   Acumin Pro / JetBrains Mono) and logo system, its own palette and rhythm.
+   Brand rules: BRAND.md in the harbor-pointe-designs repo.
    ============================================================ */
 
 :root {
@@ -32,9 +33,9 @@
   --field-border: rgba(238, 240, 234, 0.16);
 
   /* --- Type --- */
-  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-display: 'anisette-petite', 'Acumin Pro', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --font-body: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'acumin-pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* --- Layout --- */
   --maxw: 1180px;
@@ -113,12 +114,25 @@ img {
 
 .display {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.03em;
-  line-height: 1.02;
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  line-height: 1.06;
 }
+/* The accent in a headline is a weight split (Light lead, Bold finish),
+   echoing the Harbor/Pointe wordmark, not an italic. */
 .display em {
-  font-style: italic;
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* Hidden from sight, still read by screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .lead {

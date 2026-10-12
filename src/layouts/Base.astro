@@ -37,10 +37,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta name="twitter:card" content="summary" />
 
     <!-- Same type family as the Designs site. Only weights the CSS uses. -->
+    <!-- Same type system as harborpointedesigns.com: Anisette Std Petite and
+         Acumin Pro from its Adobe Fonts web project, JetBrains Mono from Google. -->
+    <link rel="preconnect" href="https://use.typekit.net" crossorigin />
+    <link rel="preconnect" href="https://p.typekit.net" crossorigin />
+    <link rel="stylesheet" href="https://use.typekit.net/pgn7zak.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500&family=Archivo:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
   </head>

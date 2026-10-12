@@ -1,11 +1,13 @@
 ---
 /**
- * "Harbor Pointe Creates" lockup. Typed (not artwork) so it stays a sibling of
- * the Designs wordmark without reusing its outlined SVG. The dot is sea glass
- * here where Designs uses clay.
+ * "Harbor Pointe Creates" lockup: the Harbor Pointe wave mark and wordmark
+ * (same system as harborpointedesigns.com, see its BRAND.md) with "Creates"
+ * as the sub-brand name. Creates' colourway puts sea glass where the studio
+ * uses starboard green: the mark's dot and the "Creates" line.
  *
- *   tone: 'paper' (on dark) | 'ink' (on light)
- *   size: font-size for the display line
+ *   tone:    'paper' (on dark) | 'ink' (on light)
+ *   size:    font-size of the name line; the mark scales with it
+ *   stacked: mark above, "Creates" on its own line (hero)
  */
 interface Props {
   tone?: 'paper' | 'ink';
@@ -13,6 +15,7 @@ interface Props {
   as?: keyof HTMLElementTagNameMap;
   class?: string;
   stacked?: boolean;
+  [attr: string]: unknown; // passed through, e.g. the parent's style scope
 }
 const {
   tone = 'paper',
@@ -20,46 +23,87 @@ const {
   as = 'span',
   class: className = '',
   stacked = false,
+  ...rest
 } = Astro.props;
 const Tag = as;
 ---
 
-<Tag class:list={['wm', `wm-${tone}`, stacked && 'wm-stacked', className]} style={`font-size:${size};`}>
-  <span class="wm-line">Harbor Pointe</span>
-  <span class="wm-line wm-em">Creates<span class="wm-dot" aria-hidden="true"></span></span>
+<Tag
+  {...rest}
+  class:list={['wm', `wm-${tone}`, stacked && 'wm-stacked', className]}
+  style={`font-size:${size};`}
+>
+  <span class="visually-hidden">Harbor Pointe Creates</span>
+  <svg class="wm-mark" viewBox="13 16 134 30" aria-hidden="true">
+    <path
+      d="M16,42 C33.67,42 42.88,34.27 48,28 C53.12,35.73 62.33,42 80,42 C97.67,42 106.88,35.73 112,28 C117.12,34.27 126.33,42 144,42"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="5.5"
+      stroke-linecap="round"
+      stroke-linejoin="miter"
+      stroke-miterlimit="4"
+    />
+    <circle class="wm-dot" cx="80" cy="27.55" r="8.5" />
+  </svg>
+  <span class="wm-words" aria-hidden="true">
+    <span class="wm-name"><b>Harbor</b>&#8202;Pointe</span>
+    <span class="wm-sub">Creates</span>
+  </span>
 </Tag>
 
 <style>
   .wm {
     display: inline-flex;
-    align-items: baseline;
-    gap: 0.28em;
+    align-items: center;
+    gap: 0.45em;
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.02em;
+    font-weight: 300;
     line-height: 1;
     white-space: nowrap;
   }
+  .wm-paper {
+    color: var(--paper);
+    --wm-accent: var(--seaglass);
+  }
+  .wm-ink {
+    color: var(--ink);
+    --wm-accent: var(--seaglass-deep);
+  }
+
+  .wm-mark {
+    display: block;
+    width: 2.1em;
+    height: auto;
+    flex: none;
+    overflow: visible;
+  }
+  .wm-dot {
+    fill: var(--wm-accent);
+  }
+
+  .wm-words {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.28em;
+  }
+  .wm-name b {
+    font-weight: 700;
+  }
+  .wm-sub {
+    color: var(--wm-accent);
+  }
+
   .wm-stacked {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.02em;
+    gap: 0.3em;
   }
-  .wm-paper { color: var(--paper); }
-  .wm-ink { color: var(--ink); }
-  .wm-em {
-    font-style: italic;
-    font-weight: 400;
-    display: inline-flex;
-    align-items: baseline;
+  .wm-stacked .wm-mark {
+    width: 2.2em;
   }
-  .wm-dot {
-    display: inline-block;
-    width: 0.24em;
-    height: 0.24em;
-    border-radius: 50%;
-    background: var(--seaglass);
-    margin-left: 0.14em;
-    transform: translateY(-0.02em);
+  .wm-stacked .wm-words {
+    flex-direction: column;
+    gap: 0.06em;
   }
 </style>
